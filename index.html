@@ -6,1503 +6,546 @@
 <meta name="theme-color" content="#000000">
 <title>گروه ساخت مانگا</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;600;700;800;900&family=Vazirmatn:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;700;800;900&family=Vazirmatn:wght@400;500;700;900&family=Lalezar&family=Aref+Ruqaa:wght@700&display=swap" rel="stylesheet">
 <style>
-/* =========================================================================
-   DESIGN TOKENS — monochrome glass. Black dominant, white as the only accent.
-   NOTE FOR OWNER: to swap the ambient collage background for real manga art,
-   see the buildMangaCollage() function near the bottom of the <script> —
-   each .panel div accepts a background-image; just set panel.style.backgroundImage.
-   Logo / site name are intentionally left empty — fill them from
-   بخش ادمین → تنظیمات.
-   ========================================================================= */
-:root{
-  --bg:#000000;
-  --bg2:#070707;
-  --glass: rgba(255,255,255,0.045);
-  --glass2: rgba(255,255,255,0.085);
-  --line: rgba(255,255,255,0.13);
-  --text:#f4f4f4;
-  --dim:#8f8f8f;
-  --accent:#ffffff;
-  --accent-dim:#c9c9c9;
-  --glow: rgba(255,255,255,0.35);
-  --radius:18px;
-  --ease:cubic-bezier(.16,.84,.44,1);
-  --serif:'Outfit',sans-serif;
-  --impact:'Bebas Neue',sans-serif;
-  --fa:'Vazirmatn',sans-serif;
-}
-/* VIP palette — same monochrome family, higher contrast + warmer glow to read as "premium" */
-.area-vip{
-  --glass: rgba(255,255,255,0.065);
-  --glass2: rgba(255,255,255,0.12);
-  --line: rgba(255,255,255,0.22);
-  --glow: rgba(255,255,255,0.55);
-}
+:root{--bg:#000;--bg2:#070707;--glass:rgba(255,255,255,.05);--glass2:rgba(255,255,255,.09);--line:rgba(255,255,255,.14);--text:#f4f4f4;--dim:#8f8f8f;--accent:#fff;--glow:rgba(255,255,255,.35);--r:18px;--ease:cubic-bezier(.16,.84,.44,1);--serif:'Outfit',sans-serif;--impact:'Bebas Neue',sans-serif;--fa:'Vazirmatn',sans-serif;--fa2:'Lalezar',cursive;--fa3:'Aref Ruqaa',serif;}
+.area-vip{--glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.13);--line:rgba(255,255,255,.24);--glow:rgba(255,255,255,.55);}
+body.light{--bg:#f2f2f0;--bg2:#fff;--glass:rgba(0,0,0,.035);--glass2:rgba(0,0,0,.07);--line:rgba(0,0,0,.14);--text:#111;--dim:#5c5c5c;--accent:#000;--glow:rgba(0,0,0,.25);}
 *{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-body{background:var(--bg);color:var(--text);font-family:var(--fa);overflow-x:hidden;min-height:100vh;line-height:1.7;}
+html{scroll-behavior:smooth;width:100%;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--fa);overflow-x:hidden;width:100%;min-height:100vh;line-height:1.7;}
 a{color:inherit;text-decoration:none;}
-button{font-family:var(--fa);}
+button{font-family:var(--fa);cursor:pointer;}
 ::selection{background:#fff;color:#000;}
-::-webkit-scrollbar{width:8px;}
-::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px;}
-
-/* ================= AMBIENT MANGA COLLAGE BACKGROUND ================= */
-#mangaCollage{position:fixed;inset:0;z-index:0;overflow:hidden;background:#000;}
-#mangaCollage::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 30%, rgba(0,0,0,0) 0%, rgba(0,0,0,.5) 55%, rgba(0,0,0,.92) 100%);z-index:5;pointer-events:none;}
-#collageField{position:absolute;inset:-6%;width:112%;height:112%;display:grid;animation:collagePan 90s ease-in-out infinite alternate;}
-@keyframes collagePan{0%{transform:scale(1) translate(0,0);}50%{transform:scale(1.05) translate(-1.2%,1%);}100%{transform:scale(1.02) translate(1%,-0.8%);}}
-.ctile{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.16);filter:grayscale(1) contrast(1.25) brightness(.6);animation:ctileBreathe ease-in-out infinite;}
+#mangaBg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#000;}
+#mangaBg::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 30%,rgba(0,0,0,0),rgba(0,0,0,.55) 55%,rgba(0,0,0,.94));z-index:5;pointer-events:none;}
+#collageField{position:absolute;inset:-6%;width:112%;height:112%;display:grid;animation:pan 90s ease-in-out infinite alternate;}
+@keyframes pan{0%{transform:scale(1) translate(0,0);}50%{transform:scale(1.06) translate(-1.5%,1.2%);}100%{transform:scale(1.02) translate(1%,-1%);}}
+.ctile{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.15);filter:grayscale(1) contrast(1.25) brightness(.6);animation:breathe ease-in-out infinite;}
 .ctile .fill{position:absolute;inset:0;background-size:cover;background-position:center;}
-.ctile .tone{position:absolute;inset:0;mix-blend-mode:overlay;opacity:.6;
-  background-image:radial-gradient(circle, rgba(255,255,255,.9) 1px, transparent 1.3px);
-  background-size:3.5px 3.5px;}
-.ctile .lines{position:absolute;inset:0;mix-blend-mode:overlay;opacity:.35;
-  background-image:repeating-linear-gradient(115deg, rgba(255,255,255,.5) 0 1px, transparent 1px 6px);}
-@keyframes ctileBreathe{0%,100%{opacity:.62;}50%{opacity:.95;}}
-
-.speed-lines{position:absolute;inset:-20%;z-index:6;pointer-events:none;opacity:.16;mix-blend-mode:screen;
-  background:repeating-conic-gradient(from 0deg, rgba(255,255,255,.9) 0deg 0.4deg, transparent 0.4deg 6deg);
-  animation:spinLines 90s linear infinite;}
-@keyframes spinLines{to{transform:rotate(360deg);}}
-
-.grain{position:fixed;inset:0;z-index:7;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
-
-.impact-flash{position:absolute;z-index:6;font-family:var(--impact);color:transparent;-webkit-text-stroke:1.5px rgba(255,255,255,.22);font-size:min(18vw,220px);letter-spacing:4px;pointer-events:none;white-space:nowrap;user-select:none;}
-
-/* ================= REVEAL ANIMATION ================= */
-.reveal{opacity:0;transform:translateY(26px);filter:blur(5px);transition:opacity .7s var(--ease),transform .7s var(--ease),filter .7s var(--ease);}
+.ctile .tone{position:absolute;inset:0;mix-blend-mode:overlay;opacity:.55;background:radial-gradient(circle,rgba(255,255,255,.9) 1px,transparent 1.3px) 0 0/3.5px 3.5px;}
+@keyframes breathe{0%,100%{opacity:.6;}50%{opacity:.95;}}
+.grain{position:fixed;inset:0;z-index:7;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+.reveal{opacity:0;transform:translateY(24px);filter:blur(5px);transition:.7s var(--ease);}
 .reveal.in{opacity:1;transform:translateY(0);filter:blur(0);}
-
 @keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
 @keyframes popIn{from{opacity:0;transform:scale(.92) translateY(12px);}to{opacity:1;transform:scale(1) translateY(0);}}
-@keyframes shimmerSweep{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
-@keyframes borderSpin{to{transform:rotate(360deg);}}
-@keyframes glowPulse{0%,100%{opacity:.45;}50%{opacity:1;}}
-@keyframes ringPulse{0%{box-shadow:0 0 0 0 var(--glow);}70%{box-shadow:0 0 0 16px rgba(255,255,255,0);}100%{box-shadow:0 0 0 0 rgba(255,255,255,0);}}
-
-/* ================= LOADER ================= */
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes ring{0%{box-shadow:0 0 0 0 var(--glow);}70%{box-shadow:0 0 0 16px rgba(255,255,255,0);}100%{box-shadow:0 0 0 0 rgba(255,255,255,0);}}
 #loader{position:fixed;inset:0;z-index:999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .5s ease;}
 #loader.hide{opacity:0;visibility:hidden;pointer-events:none;display:none;}
-
-/* ================= PRE-SITE GATE ================= */
-#preGate{position:fixed;inset:0;z-index:1001;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;transition:opacity .5s var(--ease), visibility .5s var(--ease);}
-#preGate.hide{opacity:0;visibility:hidden;pointer-events:none;}
-.gate-card{width:100%;max-width:400px;background:linear-gradient(150deg, rgba(255,255,255,.09), rgba(255,255,255,.035));border:1px solid var(--line);border-radius:26px;padding:38px 32px;backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);animation:popIn .5s var(--ease);box-shadow:0 40px 90px -20px rgba(0,0,0,.65);}
-.gate-title{text-align:center;font-family:var(--serif);font-size:19px;font-weight:800;margin-bottom:6px;}
-.gate-subtitle{text-align:center;font-size:12px;color:var(--dim);margin-bottom:24px;}
-.gate-mark{width:56px;height:56px;margin:0 auto 16px;border:1.5px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.gate-mark svg{width:26px;height:26px;}
-.auth-tabs{display:flex;gap:6px;background:rgba(255,255,255,.04);padding:5px;border-radius:100px;margin-bottom:22px;}
-.auth-tab{flex:1;text-align:center;padding:11px 8px;border-radius:100px;font-size:11.5px;font-weight:700;cursor:pointer;color:var(--dim);transition:all .3s var(--ease);border:none;background:none;font-family:var(--fa);}
-.auth-tab.active{background:#fff;color:#000;}
-.auth-form{display:none;flex-direction:column;gap:0;}
-.auth-form.active{display:flex;animation:fadeInPage .3s ease;}
-.gate-admin-toggle{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);text-align:center;}
-.gate-admin-link{background:none;border:none;color:var(--dim);font-size:11.5px;font-weight:700;cursor:pointer;transition:color .25s ease;}
-.gate-admin-link:hover{color:#fff;}
-.gate-admin-form{display:none;flex-direction:column;margin-top:14px;}
-.gate-admin-form.open{display:flex;animation:fadeInPage .3s ease;}
-.gate-guest{display:block;width:100%;text-align:center;margin-top:18px;background:none;border:none;color:var(--dim);font-size:12.5px;font-weight:700;cursor:pointer;transition:color .25s ease;}
-.gate-guest:hover{color:#fff;}
-
-/* ================= LOADER — crumpled-paper exit transition ================= */
-#loader{transition:opacity .5s ease;}
-#loader.crumple{
-  animation:paperCrumple .85s cubic-bezier(.6,-0.2,.7,0) forwards;
-  filter:url(#crumpleFilter);
-}
-@keyframes paperCrumple{
-  0%{transform:scale(1) rotate(0deg);opacity:1;}
-  55%{transform:scale(.55) rotate(-8deg);opacity:1;}
-  100%{transform:scale(.05) rotate(22deg);opacity:0;}
-}
-
-/* ================= SITE ENTRANCE (after crumple) ================= */
-body:not(.site-revealed) nav, body:not(.site-revealed) .area-container{opacity:0;pointer-events:none;}
-body.site-revealed nav{animation:navDropIn .7s var(--ease) both;}
-body.site-revealed .area-container.active{animation:siteUnfold .9s var(--ease) both;}
-@keyframes navDropIn{from{opacity:0;transform:translateY(-16px);}to{opacity:1;transform:translateY(0);}}
-@keyframes siteUnfold{from{opacity:0;transform:scale(.97);filter:blur(6px);}to{opacity:1;transform:scale(1);filter:blur(0);}}
-
-/* ================= PROMPT BURST (signup / contact nudges) ================= */
-.prompt-toast{position:fixed;bottom:28px;left:28px;z-index:600;max-width:300px;background:linear-gradient(150deg, rgba(255,255,255,.09), rgba(255,255,255,.03));border:1px solid var(--line);border-radius:18px;padding:20px;backdrop-filter:blur(18px);animation:promptIn .5s var(--ease);}
-@media (max-width:640px){.prompt-toast{left:16px;right:16px;bottom:90px;max-width:none;}}
-.prompt-toast h4{font-family:var(--serif);font-size:15px;font-weight:800;margin-bottom:8px;}
-.prompt-toast p{font-size:12px;color:var(--dim);line-height:1.7;margin-bottom:14px;}
-.prompt-toast .pt-actions{display:flex;gap:8px;}
-.prompt-toast .pt-close{position:absolute;top:10px;left:10px;width:24px;height:24px;border-radius:50%;background:var(--glass2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);font-size:12px;}
-@keyframes promptIn{0%{opacity:0;transform:translateY(30px) scale(.85);}60%{opacity:1;transform:translateY(-4px) scale(1.03);}100%{opacity:1;transform:translateY(0) scale(1);}}
-.burst-shard{position:absolute;width:5px;height:5px;background:#fff;border-radius:1px;pointer-events:none;animation:shardFly .6s ease-out forwards;}
-@keyframes shardFly{
-  0%{opacity:1;transform:translate(0,0) scale(1);}
-  100%{opacity:0;transform:translate(var(--sx), var(--sy)) scale(.2);}
-}
-.loader-mark{width:70px;height:70px;position:relative;}
-.loader-mark svg{width:100%;height:100%;animation:floatY 2.4s ease-in-out infinite;}
-.loader-mark .ring{transform-origin:35px 35px;animation:borderSpin 2.8s linear infinite;}
-.loader-sub{font-size:11.5px;color:var(--dim);letter-spacing:4px;text-transform:uppercase;}
+#loader.crumple{animation:crumple .85s cubic-bezier(.6,-.2,.7,0) forwards;}
+@keyframes crumple{0%{transform:scale(1) rotate(0);opacity:1;}55%{transform:scale(.55) rotate(-8deg);}100%{transform:scale(.05) rotate(22deg);opacity:0;}}
+.loader-mark svg{width:70px;height:70px;animation:floatY 2.4s ease-in-out infinite;}
+.loader-welcome{font-size:19px;font-weight:700;min-height:34px;display:flex;align-items:center;justify-content:center;transition:1s;text-align:center;padding:0 20px;}
+.loader-welcome.f1{font-family:var(--fa);}
+.loader-welcome.f2{font-family:var(--fa2);font-size:24px;}
+.loader-welcome.f3{font-family:var(--fa3);font-size:21px;}
+.loader-welcome.fade{opacity:0;transform:translateY(8px);filter:blur(3px);}
+.loader-sub{font-size:11px;color:var(--dim);letter-spacing:4px;text-transform:uppercase;}
 .loader-bar{width:170px;height:2px;background:var(--line);border-radius:10px;overflow:hidden;}
-.loader-bar span{display:block;height:100%;width:0;background:#fff;animation:loadProg 1.3s var(--ease) forwards;}
-@keyframes loadProg{to{width:100%;}}
-
-/* ================= NAV ================= */
-nav{position:fixed;top:0;left:0;right:0;z-index:150;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 5%;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:rgba(0,0,0,.5);border-bottom:1px solid var(--line);transition:all .35s var(--ease);}
-nav.scroll{background:rgba(0,0,0,.82);padding:10px 5%;}
-.brand{display:flex;align-items:center;gap:10px;cursor:pointer;background:none;border:none;color:inherit;min-width:40px;}
-.brand-logo-slot{width:38px;height:38px;border-radius:50%;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;flex:none;overflow:hidden;background:var(--glass);}
-.brand-logo-slot img{width:100%;height:100%;object-fit:cover;}
-.brand-name{font-family:var(--serif);font-size:17px;font-weight:800;letter-spacing:1px;min-width:6px;}
-
-.area-switch{display:flex;gap:4px;background:var(--glass);border:1px solid var(--line);border-radius:100px;padding:4px;}
-.area-btn{padding:9px 18px;border-radius:100px;border:none;background:none;color:var(--dim);font-size:12.5px;font-weight:800;cursor:pointer;transition:all .3s var(--ease);white-space:nowrap;}
+.loader-bar span{display:block;height:100%;width:0;background:#fff;animation:load 1.3s var(--ease) forwards;}
+@keyframes load{to{width:100%;}}
+#gate{position:fixed;inset:0;z-index:1001;background:rgba(0,0,0,.62);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;transition:.5s var(--ease);}
+#gate.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.gate-card{width:100%;max-width:400px;background:linear-gradient(150deg,var(--glass2),var(--glass));border:1px solid var(--line);border-radius:26px;padding:36px 30px;backdrop-filter:blur(26px);animation:popIn .5s var(--ease);}
+.gate-mark{width:54px;height:54px;margin:0 auto 16px;border:1.5px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.gate-title{text-align:center;font-family:var(--serif);font-size:19px;font-weight:800;margin-bottom:6px;}
+.gate-sub{text-align:center;font-size:12px;color:var(--dim);margin-bottom:20px;}
+.tabs{display:flex;gap:5px;background:rgba(255,255,255,.04);padding:4px;border-radius:100px;margin-bottom:18px;}
+.tab{flex:1;text-align:center;padding:8px 6px;border-radius:100px;font-size:10.5px;font-weight:700;border:none;background:none;color:var(--dim);transition:.3s;}
+.tab.active{background:#fff;color:#000;}
+.form-x{display:none;flex-direction:column;}
+.form-x.active{display:flex;animation:popIn .3s ease;}
+.gate-guest{display:block;width:100%;text-align:center;margin-top:14px;background:none;border:none;color:var(--dim);font-size:11px;opacity:.85;}
+.gate-guest:hover{color:#fff;opacity:1;}
+.gate-adm{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);text-align:center;}
+.gate-adm-link{background:none;border:none;color:var(--dim);font-size:10.5px;opacity:.75;}
+.gate-adm-form{display:none;flex-direction:column;margin-top:10px;}
+.gate-adm-form.open{display:flex;}
+.err{color:#ff7a6a;font-size:12px;min-height:16px;}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:12px;font-weight:700;margin-bottom:6px;}
+.fg input,.fg textarea,.fg select{width:100%;padding:11px 13px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;color:var(--text);font-family:var(--fa);font-size:13px;}
+.fg input:focus,.fg textarea:focus{outline:none;border-color:#fff;}
+.fg textarea{resize:vertical;min-height:80px;}
+.btn{padding:11px 22px;border:none;border-radius:10px;font-size:13px;font-weight:800;transition:.3s var(--ease);display:inline-flex;align-items:center;gap:8px;}
+.btn-s{background:#fff;color:#000;width:100%;justify-content:center;}
+.btn-s:hover{transform:translateY(-2px);}
+.btn-o{background:transparent;border:1px solid var(--line);color:var(--text);}
+.btn-o:hover{border-color:#fff;}
+.btn-d{background:rgba(255,70,70,.15);color:#ff7a6a;border:1px solid rgba(255,70,70,.4);}
+nav{position:fixed;top:0;left:0;right:0;z-index:150;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 5%;backdrop-filter:blur(20px);background:rgba(0,0,0,.5);border-bottom:1px solid var(--line);transition:.35s;}
+nav.scroll{background:rgba(0,0,0,.85);padding:10px 5%;}
+.brand{display:flex;align-items:center;gap:9px;background:none;border:none;color:inherit;}
+.brand-logo{width:36px;height:36px;border-radius:50%;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--glass);}
+.brand-logo img{width:100%;height:100%;object-fit:cover;}
+.brand-name{font-family:var(--serif);font-size:17px;font-weight:800;}
+.areas{display:flex;gap:4px;background:var(--glass);border:1px solid var(--line);border-radius:100px;padding:4px;}
+.area-btn{padding:8px 16px;border-radius:100px;border:none;background:none;color:var(--dim);font-size:12px;font-weight:800;transition:.3s;white-space:nowrap;}
 .area-btn.active{background:#fff;color:#000;}
-.area-btn:not(.active):hover{color:var(--text);}
-@media (max-width:860px){.area-switch{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:140;background:rgba(0,0,0,.75);backdrop-filter:blur(16px);box-shadow:0 20px 50px -10px rgba(0,0,0,.7);}}
-
-.nav-icons{display:flex;align-items:center;gap:8px;}
-.icon-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--glass);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);transition:all .25s var(--ease);}
-.icon-btn svg{width:17px;height:17px;}
-.icon-btn:hover{transform:translateY(-3px);border-color:#fff;box-shadow:0 14px 30px -12px var(--glow);}
-
-.menu-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:390;opacity:0;pointer-events:none;transition:opacity .35s ease;}
-.menu-overlay.open{opacity:1;pointer-events:auto;}
-.menu-panel{position:fixed;top:0;left:0;bottom:0;width:min(300px,84vw);background:#0a0a0a;border-left:1px solid var(--line);z-index:400;transform:translateX(-100%);transition:transform .4s var(--ease);display:flex;flex-direction:column;padding:90px 22px 30px;overflow-y:auto;}
-.menu-panel.open{transform:translateX(0);}
-.menu-panel a{display:flex;align-items:center;gap:12px;padding:13px 10px;border-radius:12px;font-size:14px;font-weight:700;color:var(--text);transition:all .25s ease;}
-.menu-panel a:hover{background:var(--glass2);transform:translateX(-4px);}
-.menu-panel a svg{width:18px;height:18px;flex:none;color:var(--accent-dim);}
-.menu-close{position:absolute;top:20px;left:20px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--glass2);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text);}
-
-/* ================= AREA / VIEW SYSTEM ================= */
-.area-container{display:none;}
-.area-container.active{display:block;}
+@media(max-width:820px){.areas{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:140;background:rgba(0,0,0,.8);backdrop-filter:blur(16px);}}
+.icons{display:flex;gap:8px;}
+.ibtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--glass);display:flex;align-items:center;justify-content:center;color:var(--text);transition:.25s;}
+.ibtn svg{width:17px;height:17px;}
+.ibtn:hover{border-color:#fff;transform:translateY(-2px);}
+.menu-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:390;opacity:0;pointer-events:none;transition:.3s;}
+.menu-ov.open{opacity:1;pointer-events:auto;}
+.menu{position:fixed;top:0;left:0;bottom:0;width:min(290px,84vw);background:#0a0a0a;border-left:1px solid var(--line);z-index:400;transform:translateX(-100%);transition:.4s var(--ease);padding:90px 20px 30px;overflow-y:auto;}
+.menu.open{transform:translateX(0);}
+.menu a{display:flex;align-items:center;gap:10px;padding:12px 10px;border-radius:12px;font-size:13.5px;font-weight:700;color:var(--text);}
+.menu a:hover{background:var(--glass2);}
+.menu a svg{width:17px;height:17px;color:var(--dim);}
+.mclose{position:absolute;top:20px;left:20px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--glass2);display:flex;align-items:center;justify-content:center;}
+.area{display:none;}
+.area.active{display:block;}
 .view{display:none;padding:120px 6% 70px;max-width:1180px;margin:0 auto;min-height:100vh;position:relative;z-index:2;}
-.view.active{display:block;animation:fadeInPage .5s var(--ease);}
-@keyframes fadeInPage{from{opacity:0;}to{opacity:1;}}
-
-.tag{font-family:var(--impact);font-size:13px;letter-spacing:5px;color:var(--accent-dim);display:inline-flex;align-items:center;gap:10px;margin-bottom:16px;}
-.tag::before{content:'';width:26px;height:1px;background:var(--accent-dim);}
-.section-title{font-family:var(--serif);font-size:clamp(28px,4.2vw,46px);font-weight:800;margin-bottom:14px;letter-spacing:-.5px;}
-.section-title b{-webkit-text-stroke:1px var(--line);color:transparent;font-weight:900;}
-.section-desc{color:var(--dim);max-width:600px;line-height:1.95;margin-bottom:40px;font-size:14.5px;}
-
-/* ================= GLASS PANEL BASE ================= */
-.glass{background:linear-gradient(150deg, var(--glass2), var(--glass));border:1px solid var(--line);border-radius:var(--radius);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);position:relative;}
-.area-vip .glass{position:relative;overflow:hidden;}
-.area-vip .glass::before{content:'';position:absolute;inset:-1px;padding:1px;border-radius:inherit;
-  background:conic-gradient(from 0deg, transparent 0%, rgba(255,255,255,.5) 8%, transparent 16%, transparent 50%, rgba(255,255,255,.35) 58%, transparent 66%);
-  -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude;
-  animation:borderSpin 6s linear infinite; pointer-events:none; opacity:.7;}
-
-/* ================= HOME HERO ================= */
-#view-home, #view-vip-home{padding-top:0;}
-.hero{min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;padding:40px 0 20px;}
-.hero-badge{display:inline-flex;align-items:center;gap:9px;font-family:var(--impact);font-size:13px;letter-spacing:3px;color:#000;background:#fff;padding:8px 20px;border-radius:100px;margin-bottom:30px;position:relative;z-index:3;}
-.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:#000;animation:ringPulse 1.8s ease-in-out infinite;}
-.hero h1{font-family:var(--serif);font-size:clamp(40px,8vw,84px);font-weight:900;letter-spacing:-2px;line-height:1.08;position:relative;z-index:3;}
-.hero h1 .out{-webkit-text-stroke:1.5px #fff;color:transparent;}
-.hero p{margin-top:20px;max-width:600px;color:var(--dim);font-size:15.5px;line-height:1.95;position:relative;z-index:3;}
-.hero-cta{display:flex;gap:14px;margin-top:36px;position:relative;z-index:3;flex-wrap:wrap;justify-content:center;}
-.btn-primary{padding:15px 32px;border-radius:100px;background:#fff;color:#000;font-weight:800;font-size:13.5px;border:none;cursor:pointer;transition:all .35s var(--ease);}
-.btn-primary:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 26px 54px -16px rgba(255,255,255,.4);}
-.btn-ghost{padding:15px 32px;border-radius:100px;background:transparent;border:1px solid var(--line);color:var(--text);font-weight:700;font-size:13.5px;cursor:pointer;transition:all .3s var(--ease);}
-.btn-ghost:hover{border-color:#fff;transform:translateY(-4px);}
-
-/* ================= TILES ================= */
-.tile-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:60px;position:relative;z-index:2;}
-@media (max-width:900px){.tile-grid{grid-template-columns:repeat(2,1fr);}}
-.tile{padding:30px 18px;text-align:center;cursor:pointer;transition:all .35s var(--ease);}
-.tile:hover{transform:translateY(-10px);box-shadow:0 26px 50px -18px rgba(255,255,255,.18);border-color:#fff;}
-.tile svg{width:32px;height:32px;margin:0 auto 12px;color:var(--accent-dim);transition:transform .35s var(--ease);}
-.tile:hover svg{transform:scale(1.15) translateY(-3px);color:#fff;}
-.tile .t-label{font-size:13px;font-weight:700;}
-
-/* ================= CARDS ================= */
-.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px;margin-top:20px;}
-.card{overflow:hidden;transition:all .35s var(--ease);display:flex;flex-direction:column;}
-.card:hover{transform:translateY(-8px);border-color:#fff;box-shadow:0 26px 54px -18px rgba(255,255,255,.2);}
-.card-media{width:100%;height:150px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:linear-gradient(160deg, rgba(255,255,255,.08), transparent);}
-.card-media svg{width:40px;height:40px;color:var(--accent-dim);}
-.card-body{padding:20px;flex:1;display:flex;flex-direction:column;}
-.card-title{font-size:14.5px;font-weight:800;margin-bottom:9px;}
-.card-desc{font-size:12.5px;color:var(--dim);line-height:1.8;flex:1;margin-bottom:16px;}
-.card-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:13px;font-size:11px;color:var(--dim);}
-.card-source{display:inline-flex;align-items:center;gap:6px;color:var(--text);font-weight:800;font-size:11.5px;transition:gap .25s ease;}
-.card-source:hover{gap:9px;color:#fff;}
-.card-source svg{width:13px;height:13px;}
-.vip-badge{position:absolute;top:12px;left:12px;background:#fff;color:#000;font-family:var(--impact);font-size:10.5px;letter-spacing:2px;padding:4px 10px;border-radius:100px;z-index:2;}
-
-/* ================= COMING SOON (Manga) ================= */
-.soon-wrap{min-height:56vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:22px;padding:40px;position:relative;overflow:hidden;}
-.soon-mark{width:110px;height:110px;opacity:.9;animation:floatY 4.5s ease-in-out infinite;}
-.soon-title{font-family:var(--impact);font-size:clamp(34px,7vw,64px);letter-spacing:4px;color:transparent;-webkit-text-stroke:1.6px #fff;}
-.soon-sub{color:var(--dim);max-width:460px;font-size:14px;line-height:1.9;}
-.soon-progress{width:220px;height:3px;background:var(--line);border-radius:10px;overflow:hidden;margin-top:6px;}
-.soon-progress span{display:block;height:100%;width:18%;background:#fff;border-radius:10px;position:relative;}
-.soon-progress span::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(0,0,0,.4),transparent);background-size:200% 100%;animation:shimmerSweep 2s linear infinite;}
-
-/* ================= CONTACT FORM ================= */
-.contact-wrap{display:grid;grid-template-columns:1.2fr 1fr;gap:36px;margin-top:20px;}
-@media (max-width:860px){.contact-wrap{grid-template-columns:1fr;}}
-.contact-form{padding:32px;}
-.contact-info{padding:32px;display:flex;flex-direction:column;gap:18px;justify-content:center;}
-.contact-info .ci-item{display:flex;align-items:center;gap:14px;}
-.contact-info .ci-item svg{width:20px;height:20px;color:var(--accent-dim);flex:none;}
-.contact-info .ci-item span{font-size:13px;color:var(--dim);}
-.contact-info .ci-item b{display:block;font-size:13.5px;font-weight:700;color:var(--text);}
-
-/* ================= FORM ELEMENTS ================= */
-.form-group{margin-bottom:16px;}
-.form-group label{display:block;font-size:12.5px;font-weight:700;margin-bottom:7px;color:var(--text);}
-.form-group input,.form-group textarea,.form-group select{width:100%;padding:12px 14px;background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;color:var(--text);font-family:var(--fa);font-size:13px;transition:all .25s ease;}
-.form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:#fff;box-shadow:0 0 0 3px rgba(255,255,255,.08);}
-.form-group textarea{resize:vertical;min-height:100px;}
-
-.file-upload{position:relative;display:block;cursor:pointer;width:100%;}
-.file-input{display:none;}
-.file-label{display:flex;flex-direction:column;align-items:center;gap:8px;justify-content:center;padding:26px;background:rgba(255,255,255,.03);border:2px dashed var(--line);border-radius:14px;color:var(--text);font-weight:700;font-size:12.5px;transition:all .3s var(--ease);text-align:center;}
-.file-label svg{width:22px;height:22px;}
-.file-label.drag-over{border-color:#fff;background:rgba(255,255,255,.08);}
-
-.btn{padding:11px 22px;border:none;border-radius:10px;font-family:var(--fa);font-size:13px;font-weight:800;cursor:pointer;transition:all .3s var(--ease);display:inline-flex;align-items:center;gap:8px;}
-.btn-solid{background:#fff;color:#000;}
-.btn-solid:hover{transform:translateY(-3px);box-shadow:0 16px 34px -12px rgba(255,255,255,.35);}
-.btn-out{background:transparent;color:var(--text);border:1px solid var(--line);}
-.btn-out:hover{border-color:#fff;transform:translateY(-3px);}
-.btn-danger{background:rgba(255,70,70,.14);color:#ff7a6a;border:1px solid rgba(255,70,70,.4);}
-.btn-danger:hover{background:rgba(255,70,70,.24);transform:translateY(-3px);}
-
-/* ================= VIP GATE ================= */
-.vip-gate{min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:22px;padding:40px;position:relative;}
-.vip-lock{width:78px;height:78px;position:relative;}
-.vip-lock svg{width:100%;height:100%;color:#fff;}
-.vip-gate h2{font-family:var(--serif);font-size:clamp(26px,5vw,40px);font-weight:800;}
-.vip-gate p{color:var(--dim);max-width:420px;font-size:13.5px;line-height:1.9;}
-.vip-gate form{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;justify-content:center;}
-.vip-gate input{padding:13px 18px;border-radius:100px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font-family:var(--fa);width:220px;text-align:center;letter-spacing:3px;}
-.vip-gate input:focus{outline:none;border-color:#fff;}
-.vip-err{color:#ff7a6a;font-size:12px;min-height:16px;}
-
-/* ================= ADMIN ================= */
-.admin-tabs{display:flex;gap:8px;margin-bottom:32px;flex-wrap:wrap;overflow-x:auto;}
-.admin-tab{padding:11px 20px;border:1px solid var(--line);background:var(--glass);color:var(--text);border-radius:100px;cursor:pointer;font-size:12.5px;font-weight:700;transition:all .3s var(--ease);white-space:nowrap;}
-.admin-tab:hover{border-color:#fff;transform:translateY(-2px);}
-.admin-tab.active{background:#fff;border-color:#fff;color:#000;}
-.admin-panel{display:none;}
-.admin-panel.active{display:block;animation:fadeInPage .35s ease;}
-.admin-form{padding:26px;margin-bottom:24px;}
-.admin-form h3{font-family:var(--serif);margin-bottom:18px;font-size:16px;font-weight:800;}
-.admin-list-item{padding:13px 16px;border-radius:12px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);background:var(--glass);transition:border-color .25s ease;}
-.admin-list-item:hover{border-color:#fff;}
-.admin-list-item span{font-size:13px;flex:1;}
-.admin-gate{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center;}
-
-.toast{position:fixed;bottom:26px;right:26px;padding:15px 20px;font-size:13px;font-weight:700;box-shadow:0 24px 50px -14px rgba(0,0,0,.7);animation:popIn .3s var(--ease);z-index:1000;max-width:300px;background:#111;border:1px solid #fff;border-radius:14px;}
-@media (max-width:600px){.toast{bottom:80px;right:16px;left:16px;max-width:none;}}
-
-footer{position:relative;z-index:2;border-top:1px solid var(--line);padding:44px 6% 90px;margin-top:50px;text-align:center;}
+.view.active{display:block;animation:fade .5s var(--ease);}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+.tag{font-family:var(--impact);font-size:12px;letter-spacing:5px;color:var(--dim);display:inline-flex;align-items:center;gap:10px;margin-bottom:14px;}
+.tag::before{content:'';width:24px;height:1px;background:var(--dim);}
+h2.st{font-family:var(--serif);font-size:clamp(26px,4vw,42px);font-weight:800;margin-bottom:14px;}
+h2.st b{-webkit-text-stroke:1px var(--line);color:transparent;}
+.desc{color:var(--dim);max-width:600px;line-height:1.9;margin-bottom:34px;font-size:14px;}
+.glass{background:linear-gradient(150deg,var(--glass2),var(--glass));border:1px solid var(--line);border-radius:var(--r);backdrop-filter:blur(20px);}
+.hero{min-height:88vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;padding:40px 0 20px;overflow:hidden;}
+.hbadge{display:inline-flex;align-items:center;gap:8px;font-family:var(--impact);font-size:12px;letter-spacing:3px;color:#000;background:#fff;padding:8px 18px;border-radius:100px;margin-bottom:26px;z-index:3;}
+.hbadge span{width:6px;height:6px;border-radius:50%;background:#000;animation:ring 1.8s ease-in-out infinite;}
+.hero h1{font-family:var(--serif);font-size:clamp(38px,7.5vw,78px);font-weight:900;letter-spacing:-1.5px;line-height:1.1;z-index:3;position:relative;}
+.hero h1 span{-webkit-text-stroke:1.4px #fff;color:transparent;}
+.hero p{margin-top:18px;max-width:580px;color:var(--dim);font-size:15px;line-height:1.9;z-index:3;position:relative;}
+.hcta{display:flex;gap:12px;margin-top:32px;flex-wrap:wrap;justify-content:center;z-index:3;position:relative;}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:54px;}
+@media(max-width:820px){.tiles{grid-template-columns:repeat(2,1fr);}}
+.tile{padding:26px 16px;text-align:center;transition:.3s var(--ease);}
+.tile:hover{transform:translateY(-8px);border-color:#fff;}
+.tile svg{width:28px;height:28px;margin:0 auto 10px;color:var(--dim);}
+.tile:hover svg{color:#fff;}
+.tile span{font-size:12.5px;font-weight:700;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:13px;margin-top:20px;}
+.ntile{aspect-ratio:1/1;border-radius:14px;padding:13px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:.3s var(--ease);position:relative;overflow:hidden;background-size:cover;background-position:center;}
+.ntile:hover{transform:translateY(-6px);border-color:#fff;}
+.ntile b{font-size:12px;font-weight:800;line-height:1.4;}
+.ntile small{font-size:10px;color:var(--dim);font-weight:700;}
+.vipb{position:absolute;top:8px;left:8px;background:#fff;color:#000;font-family:var(--impact);font-size:10px;padding:3px 9px;border-radius:100px;}
+#ndv{position:fixed;inset:0;z-index:130;background:var(--bg);overflow-y:auto;display:none;padding:110px 6% 70px;}
+#ndv.active{display:block;animation:fade .4s var(--ease);}
+.ndback{display:inline-flex;align-items:center;gap:8px;background:var(--glass);border:1px solid var(--line);padding:9px 16px;border-radius:100px;font-size:12.5px;font-weight:700;margin-bottom:24px;}
+.ndhero{width:100%;height:220px;border-radius:18px;overflow:hidden;margin-bottom:26px;border:1px solid var(--line);background-size:cover;background-position:center;filter:grayscale(1) contrast(1.2) brightness(.55);}
+.ndtitle{font-family:var(--serif);font-size:clamp(24px,4vw,36px);font-weight:800;margin-bottom:16px;max-width:740px;}
+.ndbody{color:var(--dim);font-size:15px;line-height:2.1;max-width:700px;margin-bottom:24px;}
+.src{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:12px;}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;margin-top:20px;}
+.card{padding:18px;transition:.3s var(--ease);}
+.card:hover{transform:translateY(-6px);border-color:#fff;}
+.card b{display:block;font-size:14px;font-weight:800;margin-bottom:8px;}
+.card p{font-size:12.5px;color:var(--dim);line-height:1.7;}
+.soon{min-height:50vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:18px;padding:36px;}
+.soon-t{font-family:var(--impact);font-size:clamp(30px,6vw,56px);letter-spacing:4px;color:transparent;-webkit-text-stroke:1.5px #fff;}
+.cwrap{display:grid;grid-template-columns:1.2fr 1fr;gap:30px;margin-top:20px;}
+@media(max-width:820px){.cwrap{grid-template-columns:1fr;}}
+.cinfo{padding:28px;display:flex;flex-direction:column;gap:14px;justify-content:center;}
+.cinfo div{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--dim);}
+.cinfo svg{width:18px;height:18px;color:var(--dim);flex:none;}
+.admtabs{display:flex;gap:7px;margin-bottom:28px;flex-wrap:wrap;overflow-x:auto;}
+.admtab{padding:10px 18px;border:1px solid var(--line);background:var(--glass);color:var(--text);border-radius:100px;font-size:12px;font-weight:700;white-space:nowrap;}
+.admtab.active{background:#fff;color:#000;border-color:#fff;}
+.admp{display:none;}
+.admp.active{display:block;animation:fade .3s ease;}
+.admform{padding:22px;margin-bottom:20px;}
+.admform h3{font-family:var(--serif);margin-bottom:16px;font-size:15px;}
+.li{padding:12px 14px;border-radius:11px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--line);background:var(--glass);}
+.li span{font-size:12.5px;flex:1;}
+.fu{display:block;cursor:pointer;width:100%;}
+.fu input{display:none;}
+.fu label{display:flex;align-items:center;gap:8px;justify-content:center;padding:20px;background:rgba(255,255,255,.03);border:2px dashed var(--line);border-radius:12px;color:var(--text);font-size:12px;}
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 18px;font-size:12.5px;font-weight:700;background:#111;border:1px solid #fff;border-radius:14px;animation:popIn .3s var(--ease);z-index:1000;max-width:280px;}
+.prompt{position:fixed;bottom:26px;left:26px;z-index:600;max-width:290px;background:linear-gradient(150deg,var(--glass2),var(--glass));border:1px solid var(--line);border-radius:16px;padding:18px;backdrop-filter:blur(18px);animation:pIn .5s var(--ease);}
+@media(max-width:640px){.prompt{left:16px;right:16px;bottom:90px;max-width:none;}}
+.prompt h4{font-family:var(--serif);font-size:14px;margin-bottom:6px;}
+.prompt p{font-size:11.5px;color:var(--dim);margin-bottom:12px;}
+.prompt .pa{display:flex;gap:8px;}
+.pclose{position:absolute;top:9px;left:9px;width:22px;height:22px;border-radius:50%;background:var(--glass2);border:1px solid var(--line);font-size:11px;}
+@keyframes pIn{0%{opacity:0;transform:translateY(26px) scale(.85);}60%{opacity:1;transform:translateY(-4px) scale(1.02);}100%{transform:translateY(0) scale(1);}}
+.shard{position:absolute;width:5px;height:5px;background:#fff;pointer-events:none;animation:sf .6s ease-out forwards;}
+@keyframes sf{to{opacity:0;transform:translate(var(--sx),var(--sy)) scale(.2);}}
+body:not(.on) nav,body:not(.on) .area{opacity:0;pointer-events:none;}
+body.on nav{animation:navin .7s var(--ease) both;}
+body.on .area.active{animation:unfold .9s var(--ease) both;}
+@keyframes navin{from{opacity:0;transform:translateY(-14px);}to{opacity:1;transform:translateY(0);}}
+@keyframes unfold{from{opacity:0;transform:scale(.97);filter:blur(6px);}to{opacity:1;transform:scale(1);filter:blur(0);}}
+footer{position:relative;z-index:2;border-top:1px solid var(--line);padding:40px 6% 90px;margin-top:50px;text-align:center;}
 footer p{color:var(--dim);font-size:12px;}
-
-@media (max-width:768px){
-  .view{padding:100px 4% 90px;}
-  .section-title{font-size:clamp(22px,5.5vw,30px);}
-}
 </style>
 </head>
 <body>
-<div id="mangaCollage"></div>
-<div class="speed-lines"></div>
+<div id="mangaBg"></div>
 <div class="grain"></div>
 
-<!-- ================= LOADER ================= -->
-<!-- SVG filter used to distort the loader like crumpling paper -->
-<svg width="0" height="0" style="position:absolute;">
-  <filter id="crumpleFilter">
-    <feTurbulence id="crumpleTurb" type="fractalNoise" baseFrequency="0.01" numOctaves="2" seed="7" result="noise"/>
-    <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
-
-<!-- ================= PRE-SITE GATE (signup default / login / admin) ================= -->
-<div id="preGate">
+<div id="gate">
   <div class="gate-card">
-    <div class="gate-mark">
-      <svg viewBox="0 0 70 70" fill="none">
-        <path d="M20 45 L35 18 L50 45 Z" stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <div class="gate-title" id="gateTitle">به گروه بپیوند</div>
-    <div class="gate-subtitle" id="gateSubtitle">ثبت‌نام رایگان و سریع</div>
-
-    <div class="auth-tabs" id="gateMainTabs">
-      <button class="auth-tab active" type="button" onclick="switchGateTab('signup')">ثبت‌نام</button>
-      <button class="auth-tab" type="button" onclick="switchGateTab('login')">اکانت دارم</button>
-    </div>
-
-    <form class="auth-form active" id="gateSignupForm" onsubmit="return gateSignup(event)">
-      <div class="form-group"><label>نام</label><input type="text" id="gsName" required placeholder="نام کامل"></div>
-      <div class="form-group"><label>نام کاربری</label><input type="text" id="gsUsername" required placeholder="نام کاربری"></div>
-      <div class="form-group"><label>ایمیل</label><input type="email" id="gsEmail" required placeholder="you@example.com"></div>
-      <div class="form-group"><label>رمز عبور</label><input type="password" id="gsPass" required minlength="4" placeholder="حداقل ۴ کاراکتر"></div>
-      <button class="btn btn-solid" style="justify-content:center;width:100%;" type="submit">ساخت حساب</button>
+    <div class="gate-mark"><svg width="24" height="24" viewBox="0 0 70 70" fill="none"><path d="M20 45 L35 18 L50 45 Z" stroke="#fff" stroke-width="2" fill="none"/></svg></div>
+    <div class="gate-title" id="gtTitle">به گروه بپیوند</div>
+    <div class="gate-sub" id="gtSub">ثبت‌نام رایگان و سریع</div>
+    <div class="tabs"><button class="tab active" onclick="gtab('su')">ثبت‌نام</button><button class="tab" onclick="gtab('li')">اکانت دارم</button></div>
+    <form class="form-x active" id="suForm" onsubmit="return gSignup(event)">
+      <div class="fg"><label>نام</label><input id="suN" required></div>
+      <div class="fg"><label>نام کاربری</label><input id="suU" required></div>
+      <div class="fg"><label>ایمیل</label><input type="email" id="suE" required></div>
+      <div class="fg"><label>رمز عبور</label><input type="password" id="suP" required minlength="4"></div>
+      <button class="btn btn-s">ساخت حساب</button>
     </form>
-
-    <form class="auth-form" id="gateLoginForm" onsubmit="return gateLogin(event)">
-      <div class="form-group"><label>نام کاربری</label><input type="text" id="glUsername" required placeholder="نام کاربری"></div>
-      <div class="form-group"><label>رمز عبور</label><input type="password" id="glPass" required placeholder="••••••••"></div>
-      <div class="vip-err" id="gateLoginErr"></div>
-      <button class="btn btn-solid" style="justify-content:center;width:100%;" type="submit">ورود</button>
+    <form class="form-x" id="liForm" onsubmit="return gLogin(event)">
+      <div class="fg"><label>نام کاربری</label><input id="liU" required></div>
+      <div class="fg"><label>رمز عبور</label><input type="password" id="liP" required></div>
+      <div class="err" id="liErr"></div>
+      <button class="btn btn-s">ورود</button>
     </form>
-
-    <button class="gate-guest" onclick="proceedFromGate(false)">ورود به‌عنوان مهمان ←</button>
-
-    <div class="gate-admin-toggle">
-      <button type="button" class="gate-admin-link" onclick="toggleGateAdmin()">ورود ادمین →</button>
-      <form class="gate-admin-form" id="gateAdminForm" onsubmit="return gateAdminLogin(event)">
-        <div class="form-group"><input type="password" id="gateAdminPass" placeholder="رمز ادمین" style="text-align:center;letter-spacing:3px;"></div>
-        <div class="vip-err" id="gateAdminErr"></div>
-        <button class="btn btn-out" style="justify-content:center;width:100%;" type="submit">ورود مستقیم به ادمین</button>
+    <button class="gate-guest" onclick="proceed(false)">ورود به‌عنوان مهمان ←</button>
+    <div class="gate-adm">
+      <button class="gate-adm-link" onclick="document.getElementById('gaForm').classList.toggle('open')">ورود ادمین →</button>
+      <form class="gate-adm-form" id="gaForm" onsubmit="return gAdmin(event)">
+        <div class="fg"><input type="password" id="gaP" placeholder="رمز ادمین" style="text-align:center;letter-spacing:3px;"></div>
+        <div class="err" id="gaErr"></div>
+        <button class="btn btn-o" style="width:100%;justify-content:center;">ورود مستقیم</button>
       </form>
     </div>
   </div>
 </div>
 
-<!-- ================= LOADER ================= -->
 <div id="loader">
-  <div class="loader-mark">
-    <svg viewBox="0 0 70 70" fill="none">
-      <circle class="ring" cx="35" cy="35" r="30" stroke="#fff" stroke-width="1.5" stroke-dasharray="7 9" opacity=".5"/>
-      <path d="M20 45 L35 18 L50 45 Z" stroke="#fff" stroke-width="2" fill="none" stroke-linejoin="round"/>
-    </svg>
-  </div>
+  <div class="loader-mark"><svg viewBox="0 0 70 70" fill="none"><circle cx="35" cy="35" r="30" stroke="#fff" stroke-width="1.5" stroke-dasharray="7 9" opacity=".5"/><path d="M20 45 L35 18 L50 45 Z" stroke="#fff" stroke-width="2" fill="none"/></svg></div>
+  <div class="loader-welcome f1" id="lw">به سایت گروه ما خوش اومدید</div>
   <div class="loader-sub">در حال بارگذاری</div>
   <div class="loader-bar"><span></span></div>
 </div>
 
-<!-- ================= NAV ================= -->
-<nav id="mainNav">
-  <button class="brand" onclick="switchArea('public'); switchView('public','home');">
-    <span class="brand-logo-slot" id="brandLogoSlot"></span>
-    <span class="brand-name" id="brandNameEl"></span>
+<nav id="nav">
+  <button class="brand" onclick="sArea('public');sView('public','home');">
+    <span class="brand-logo" id="bLogo"></span><span class="brand-name" id="bName"></span>
   </button>
-
-  <div class="area-switch">
-    <button class="area-btn active" data-area="public" onclick="switchArea('public')">عمومی</button>
-    <button class="area-btn" data-area="vip" onclick="switchArea('vip')">VIP</button>
-    <button class="area-btn" data-area="admin" onclick="switchArea('admin')">بخش ادمین</button>
+  <div class="areas">
+    <button class="area-btn active" data-a="public" onclick="sArea('public')">عمومی</button>
+    <button class="area-btn" data-a="vip" onclick="sArea('vip')">VIP</button>
+    <button class="area-btn" data-a="admin" onclick="sArea('admin')">بخش ادمین</button>
   </div>
-
-  <div class="nav-icons">
-    <button class="icon-btn" onclick="openMenuPanel()" title="منو">
-      <svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/></svg>
-    </button>
+  <div class="icons">
+    <button class="ibtn" onclick="document.body.classList.toggle('light')" title="تم"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg></button>
+    <button class="ibtn" id="mBtn" onclick="tMusic()" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></button>
+    <button class="ibtn" onclick="oMenu()"><svg viewBox="0 0 24 24" fill="none"><circle cx="5" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="19" cy="12" r="1.8" fill="currentColor"/></svg></button>
   </div>
 </nav>
-
-<div class="menu-overlay" id="menuOverlay" onclick="closeMenuPanel()"></div>
-<div class="menu-panel" id="menuPanel">
-  <button class="menu-close" onclick="closeMenuPanel()">
-    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
-  </button>
-  <div id="menuPanelLinks"></div>
+<audio id="bgA" loop></audio>
+<div class="menu-ov" id="mOv" onclick="cMenu()"></div>
+<div class="menu" id="mPanel">
+  <button class="mclose" onclick="cMenu()">✕</button>
+  <div id="mLinks"></div>
 </div>
 
-<!-- ============================================================= -->
-<!-- PUBLIC AREA                                                    -->
-<!-- ============================================================= -->
-<div class="area-container active" id="area-public">
-
-  <div class="view active" id="view-public-home">
+<div class="area active" id="a-public">
+  <div class="view active" id="v-public-home">
     <section class="hero">
-      <span class="impact-flash" style="top:8%;right:-5%;">MANGA STUDIO</span>
-      <span class="hero-badge reveal in"><span class="dot"></span>گروه ساخت مانگا</span>
-      <h1 class="reveal in">داستان‌هایی که <span class="out">هنوز</span><br>نوشته نشده‌اند</h1>
-      <p class="reveal in">اینجا خانه‌ی یک گروه کوچک برای ساخت مانگای اورجینال است. اولین اثر به‌زودی منتشر می‌شود؛ تا آن‌موقع اخبار انیمه را دنبال کنید.</p>
-      <div class="hero-cta reveal in">
-        <button class="btn-primary" onclick="switchView('public','manga')">مانگای ما</button>
-        <button class="btn-ghost" onclick="switchView('public','anime')">اخبار انیمه</button>
+      <span class="hbadge reveal in"><span></span>گروه ساخت مانگا</span>
+      <h1 class="reveal in">داستان‌هایی که <span>هنوز</span><br>نوشته نشده‌اند</h1>
+      <p class="reveal in">خانه‌ی یک گروه کوچک برای ساخت مانگای اورجینال. اولین اثر به‌زودی می‌رسد؛ تا آن‌موقع اخبار انیمه را دنبال کنید.</p>
+      <div class="hcta reveal in">
+        <button class="btn btn-s" style="width:auto;padding:14px 28px;" onclick="sView('public','manga')">مانگای ما</button>
+        <button class="btn btn-o" onclick="sView('public','anime')">اخبار انیمه</button>
       </div>
     </section>
-
-    <div class="tile-grid">
-      <div class="tile glass reveal" onclick="switchView('public','anime')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
-        <span class="t-label">اخبار انیمه</span>
-      </div>
-      <div class="tile glass reveal" onclick="switchView('public','manga')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0-1 1-2 2-2h6v18H6c-1 0-2-1-2-2Z"/><path d="M12 3h6c1 0 2 1 2 2v14c0 1-1 2-2 2h-6"/></svg>
-        <span class="t-label">مانگای ما</span>
-      </div>
-      <div class="tile glass reveal" onclick="switchArea('vip')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-        <span class="t-label">دسترسی VIP</span>
-      </div>
-      <div class="tile glass reveal" onclick="switchView('public','contact')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8l-4 4Z"/></svg>
-        <span class="t-label">ارتباط با ما</span>
-      </div>
-      <div class="tile glass reveal" onclick="switchView('public','signup')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M19 8h4M21 6v4"/></svg>
-        <span class="t-label">ثبت‌نام</span>
-      </div>
-      <div class="tile glass reveal" onclick="switchView('public','about')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg>
-        <span class="t-label">درباره ما</span>
-      </div>
+    <div class="tiles">
+      <div class="tile glass reveal" onclick="sView('public','anime')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="13" rx="2"/><path d="M8 21h8M12 18v3"/></svg><span>اخبار انیمه</span></div>
+      <div class="tile glass reveal" onclick="sView('public','manga')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5c0-1 1-2 2-2h6v18H6c-1 0-2-1-2-2Z"/><path d="M12 3h6c1 0 2 1 2 2v14c0 1-1 2-2 2h-6"/></svg><span>مانگای ما</span></div>
+      <div class="tile glass reveal" onclick="sArea('vip')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span>دسترسی VIP</span></div>
+      <div class="tile glass reveal" onclick="sView('public','contact')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8l-4 4Z"/></svg><span>ارتباط با ما</span></div>
     </div>
   </div>
 
-  <div class="view" id="view-public-anime">
-    <span class="tag reveal">ANIME NEWS</span>
-    <h2 class="section-title reveal">اخبار <b>انیمه</b></h2>
-    <p class="section-desc reveal">تازه‌ترین اخبار سریال‌های انیمه، با لینک مستقیم به منبع رسمی هرکدام.</p>
-    <div class="card-grid" id="animeContainer"></div>
+  <div class="view" id="v-public-anime">
+    <span class="tag reveal">ANIME NEWS</span><h2 class="st reveal">اخبار <b>انیمه</b></h2>
+    <p class="desc reveal">تازه‌ترین اخبار انیمه، با لینک مستقیم به منبع رسمی.</p>
+    <div class="grid" id="newsGrid"></div>
   </div>
 
-  <div class="view" id="view-public-manga">
-    <span class="tag reveal">OUR MANGA</span>
-    <h2 class="section-title reveal">مانگای <b>ما</b></h2>
-    <div class="glass soon-wrap reveal">
-      <svg class="soon-mark" viewBox="0 0 120 120" fill="none">
-        <circle cx="60" cy="63" r="36" stroke="#fff" stroke-width="2"/>
-        <circle cx="37" cy="33" r="13" stroke="#fff" stroke-width="2"/>
-        <circle cx="83" cy="33" r="13" stroke="#fff" stroke-width="2"/>
-        <ellipse cx="47" cy="60" rx="7" ry="9" fill="#fff"/>
-        <ellipse cx="73" cy="60" rx="7" ry="9" fill="#fff"/>
-      </svg>
-      <div class="soon-title">به زودی</div>
-      <p class="soon-sub">اولین اثر گروه در حال نگارش و طراحی است. هنوز هیچ فصلی منتشر نشده — همین‌جا اولین‌ها خواهید بود که خبردار می‌شوید.</p>
-      <div class="soon-progress"><span></span></div>
+  <div class="view" id="v-public-manga">
+    <span class="tag reveal">OUR MANGA</span><h2 class="st reveal">مانگای <b>ما</b></h2>
+    <div class="glass soon reveal">
+      <div class="soon-t">به زودی</div>
+      <p style="color:var(--dim);max-width:440px;">اولین اثر گروه در حال نگارش است. هنوز فصلی منتشر نشده؛ همین‌جا اولین‌ها خواهید بود که خبردار می‌شوید.</p>
     </div>
   </div>
 
-  <div class="view" id="view-public-signup">
-    <span class="tag reveal">JOIN US</span>
-    <h2 class="section-title reveal">ثبت‌<b>نام</b></h2>
-    <p class="section-desc reveal">با ساخت حساب، از انتشار مانگا و اخبار جدید زودتر باخبر می‌شوی.</p>
-    <div class="contact-wrap">
-      <form class="glass contact-form reveal" onsubmit="return submitSignup(event)" style="max-width:460px;">
-        <div class="form-group"><label>نام</label><input type="text" id="suName" required placeholder="نام کامل"></div>
-        <div class="form-group"><label>نام کاربری</label><input type="text" id="suUsername" required placeholder="مثلاً manga_fan"></div>
-        <div class="form-group"><label>ایمیل</label><input type="email" id="suEmail" required placeholder="you@example.com"></div>
-        <div class="form-group"><label>رمز عبور</label><input type="password" id="suPass" required minlength="4" placeholder="حداقل ۴ کاراکتر"></div>
-        <button class="btn btn-solid" type="submit">ساخت حساب</button>
+  <div class="view" id="v-public-contact">
+    <span class="tag reveal">CONTACT</span><h2 class="st reveal">ارتباط با <b>ما</b></h2>
+    <p class="desc reveal">سوال، پیشنهاد یا همکاری داری؟ پیام بگذار.</p>
+    <div class="cwrap">
+      <form class="glass admform reveal" onsubmit="return sContact(event)">
+        <div class="fg"><label>نام</label><input id="cN" required></div>
+        <div class="fg"><label>ایمیل</label><input type="email" id="cE" required></div>
+        <div class="fg"><label>پیام</label><textarea id="cM" required></textarea></div>
+        <button class="btn btn-s">ارسال پیام</button>
       </form>
-      <div class="glass contact-info reveal">
-        <div class="ci-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
-          <span><b>عضویت رایگان</b>ثبت‌نام هیچ هزینه‌ای ندارد</span>
-        </div>
-        <div class="ci-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-          <span><b>دسترسی VIP</b>جدا از این حساب است و رمز خودش را دارد</span>
-        </div>
+      <div class="glass cinfo reveal">
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 3 2 10.5l6.5 2.5M22 3l-4 18-9-6.5M22 3 8.5 13l-.5 6 3.5-3.5"/></svg><a href="https://t.me/PV_n0irx" target="_blank">تلگرام: t.me/PV_n0irx</a></div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg><a href="https://rubika.ir/B105ick" target="_blank">روبیکا: rubika.ir/B105ick</a></div>
+        <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg><span>پاسخ‌گویی: کمتر از ۴۸ ساعت</span></div>
       </div>
     </div>
   </div>
 
-  <div class="view" id="view-public-contact">
-    <span class="tag reveal">CONTACT</span>
-    <h2 class="section-title reveal">ارتباط با <b>ما</b></h2>
-    <p class="section-desc reveal">سوال، پیشنهاد یا همکاری داری؟ پیام بگذار، می‌خوانیم.</p>
-    <div class="contact-wrap">
-      <form class="glass contact-form reveal" onsubmit="return submitContact(event)">
-        <div class="form-group"><label>نام</label><input type="text" id="cName" required placeholder="نام شما"></div>
-        <div class="form-group"><label>ایمیل</label><input type="email" id="cEmail" required placeholder="you@example.com"></div>
-        <div class="form-group"><label>پیام</label><textarea id="cMsg" required placeholder="پیام خود را بنویسید..."></textarea></div>
-        <button class="btn btn-solid" type="submit">ارسال پیام</button>
-      </form>
-      <div class="glass contact-info reveal">
-        <div class="ci-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8l-4 4Z"/></svg>
-          <span><b>ایمیل</b>در بخش ادمین تنظیم می‌شود</span>
-        </div>
-        <div class="ci-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M22 3 2 10.5l6.5 2.5M22 3l-4 18-9-6.5M22 3 8.5 13l-.5 6 3.5-3.5"/></svg>
-          <span><b>تلگرام</b><a href="https://t.me/PV_n0irx" target="_blank" rel="noopener" style="color:var(--text);text-decoration:underline;">t.me/PV_n0irx</a></span>
-        </div>
-        <div class="ci-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 6 10-6"/></svg>
-          <span><b>روبیکا</b><a href="https://rubika.ir/B105ick" target="_blank" rel="noopener" style="color:var(--text);text-decoration:underline;">rubika.ir/B105ick</a></span>
-        </div>
-        <div class="ci-item">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-          <span><b>زمان پاسخ‌گویی</b>معمولاً کمتر از ۴۸ ساعت</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="view" id="view-public-about">
-    <span class="tag reveal">ABOUT US</span>
-    <h2 class="section-title reveal">درباره <b>ما</b></h2>
-    <div class="glass admin-form reveal" style="max-width:720px;">
-      <p id="aboutText" style="color:var(--dim);line-height:2;font-size:14px;"></p>
-    </div>
-  </div>
-
-  <div class="view" id="view-public-team">
-    <span class="tag reveal">OUR TEAM</span>
-    <h2 class="section-title reveal">تیم <b>ما</b></h2>
-    <p class="section-desc reveal">آدم‌هایی که پشت این پروژه‌اند.</p>
-    <div class="card-grid" id="teamContainer"></div>
-  </div>
-
-  <div class="view" id="view-public-gallery">
-    <span class="tag reveal">GALLERY</span>
-    <h2 class="section-title reveal">گالری <b>طراحی‌ها</b></h2>
-    <p class="section-desc reveal">اسکچ‌ها و طرح‌های اولیه‌ی در حال کار.</p>
-    <div class="card-grid" id="galleryContainer"></div>
-  </div>
-
-  <div class="view" id="view-public-blog">
-    <span class="tag reveal">UPDATES</span>
-    <h2 class="section-title reveal">یادداشت‌های <b>گروه</b></h2>
-    <p class="section-desc reveal">تازه‌ترین به‌روزرسانی‌ها و پشت‌صحنه‌ی کار.</p>
-    <div class="card-grid" id="blogContainer"></div>
-  </div>
-
-  <div class="view" id="view-public-join">
-    <span class="tag reveal">JOIN THE TEAM</span>
-    <h2 class="section-title reveal">همکاری با <b>ما</b></h2>
-    <p class="section-desc reveal">نویسنده، نقاش یا ادیتوری؟ به گروه ملحق شو.</p>
-    <form class="glass admin-form reveal" style="max-width:500px;" onsubmit="return submitJoin(event)">
-      <div class="form-group"><label>نام</label><input type="text" id="jName" required placeholder="نام شما"></div>
-      <div class="form-group"><label>تخصص</label><input type="text" id="jSkill" required placeholder="مثلاً نقاش، نویسنده، ادیتور"></div>
-      <div class="form-group"><label>ایمیل یا آیدی تلگرام</label><input type="text" id="jContact" required placeholder="راه ارتباطی"></div>
-      <div class="form-group"><label>درباره خودت بگو</label><textarea id="jMsg" placeholder="نمونه‌کار، سابقه، هرچی لازمه بدونیم"></textarea></div>
-      <button class="btn btn-solid" type="submit">ارسال درخواست</button>
+  <div class="view" id="v-public-signup">
+    <span class="tag reveal">JOIN</span><h2 class="st reveal">ثبت‌<b>نام</b></h2>
+    <form class="glass admform reveal" style="max-width:440px;" onsubmit="return sSignup(event)">
+      <div class="fg"><label>نام</label><input id="suN2" required></div>
+      <div class="fg"><label>نام کاربری</label><input id="suU2" required></div>
+      <div class="fg"><label>ایمیل</label><input type="email" id="suE2" required></div>
+      <div class="fg"><label>رمز عبور</label><input type="password" id="suP2" required minlength="4"></div>
+      <button class="btn btn-s">ساخت حساب</button>
     </form>
   </div>
+
+  <div class="view" id="v-public-about">
+    <span class="tag reveal">ABOUT</span><h2 class="st reveal">درباره <b>ما</b></h2>
+    <div class="glass admform reveal" style="max-width:700px;"><p id="aboutTxt" style="color:var(--dim);line-height:2;"></p></div>
+  </div>
 </div>
 
-<!-- ============================================================= -->
-<!-- VIP AREA                                                       -->
-<!-- ============================================================= -->
-<div class="area-container area-vip" id="area-vip">
-
-  <div class="view active" id="view-vip-gate">
-    <div class="vip-gate">
-      <div class="vip-lock">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-      </div>
+<div class="area area-vip" id="a-vip">
+  <div class="view active" id="v-vip-gate">
+    <div class="soon">
+      <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
       <span class="tag" style="margin:0;">VIP ACCESS</span>
-      <h2>محتوای اختصاصی</h2>
-      <p>این بخش با رمز عبور محافظت می‌شود. رمز را از مدیر گروه بگیرید.</p>
-      <form onsubmit="return checkVipPass(event)">
-        <input type="password" id="vipPassInput" placeholder="رمز VIP" maxlength="20">
-        <button class="btn btn-solid" type="submit">ورود</button>
+      <h2 class="st" style="margin:0;">محتوای اختصاصی</h2>
+      <p style="color:var(--dim);max-width:400px;">این بخش با رمز محافظت می‌شود.</p>
+      <form onsubmit="return vCheck(event)" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+        <input id="vipP" type="password" placeholder="رمز VIP" style="padding:12px 18px;border-radius:100px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);width:200px;text-align:center;letter-spacing:3px;">
+        <button class="btn btn-s" style="width:auto;">ورود</button>
       </form>
-      <div class="vip-err" id="vipErr"></div>
+      <div class="err" id="vErr"></div>
     </div>
   </div>
-
-  <div class="view" id="view-vip-home">
-    <section class="hero" style="min-height:70vh;">
-      <span class="hero-badge reveal in"><span class="dot"></span>عضو VIP</span>
-      <h1 class="reveal in" style="font-size:clamp(34px,6vw,60px);">به بخش <span class="out">ویژه</span> خوش آمدید</h1>
-      <p class="reveal in">پیش‌نمایش‌ها، اخبار زودتر از موعد و محتوای اختصاصی گروه، فقط برای اعضای VIP.</p>
+  <div class="view" id="v-vip-home">
+    <section class="hero" style="min-height:60vh;">
+      <span class="hbadge reveal in"><span></span>عضو VIP</span>
+      <h1 class="reveal in" style="font-size:clamp(32px,6vw,54px);">به بخش <span>ویژه</span> خوش آمدید</h1>
+      <p class="reveal in">اخبار زودتر از موعد و محتوای اختصاصی گروه.</p>
     </section>
-    <div class="tile-grid">
-      <div class="tile glass reveal" onclick="switchView('vip','anime')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
-        <span class="t-label">اخبار اختصاصی</span>
-      </div>
-      <div class="tile glass reveal" onclick="switchView('vip','manga')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0-1 1-2 2-2h6v18H6c-1 0-2-1-2-2Z"/><path d="M12 3h6c1 0 2 1 2 2v14c0 1-1 2-2 2h-6"/></svg>
-        <span class="t-label">پیش‌نمایش مانگا</span>
-      </div>
-      <div class="tile glass reveal" onclick="switchArea('public'); switchView('public','contact');">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8l-4 4Z"/></svg>
-        <span class="t-label">ارتباط با ما</span>
-      </div>
-      <div class="tile glass reveal" onclick="vipLogout()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
-        <span class="t-label">خروج از VIP</span>
-      </div>
+    <div class="tiles">
+      <div class="tile glass reveal" onclick="sView('vip','anime')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="13" rx="2"/><path d="M8 21h8M12 18v3"/></svg><span>اخبار اختصاصی</span></div>
+      <div class="tile glass reveal" onclick="sArea('public');sView('public','contact');"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8l-4 4Z"/></svg><span>ارتباط با ما</span></div>
+      <div class="tile glass reveal" onclick="vLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span>خروج از VIP</span></div>
     </div>
   </div>
-
-  <div class="view" id="view-vip-anime">
-    <span class="tag reveal">EXCLUSIVE NEWS</span>
-    <h2 class="section-title reveal">اخبار <b>اختصاصی</b></h2>
-    <p class="section-desc reveal">خبرهایی که زودتر از بخش عمومی، اینجا منتشر می‌شود.</p>
-    <div class="card-grid" id="vipAnimeContainer"></div>
-  </div>
-
-  <div class="view" id="view-vip-manga">
-    <span class="tag reveal">VIP PREVIEW</span>
-    <h2 class="section-title reveal">پیش‌نمایش <b>اختصاصی</b></h2>
-    <div class="glass soon-wrap reveal">
-      <div class="vip-badge" style="position:static;margin-bottom:6px;">VIP</div>
-      <svg class="soon-mark" viewBox="0 0 120 120" fill="none">
-        <circle cx="60" cy="63" r="36" stroke="#fff" stroke-width="2"/>
-        <circle cx="37" cy="33" r="13" stroke="#fff" stroke-width="2"/>
-        <circle cx="83" cy="33" r="13" stroke="#fff" stroke-width="2"/>
-        <ellipse cx="47" cy="60" rx="7" ry="9" fill="#fff"/>
-        <ellipse cx="73" cy="60" rx="7" ry="9" fill="#fff"/>
-      </svg>
-      <div class="soon-title">به زودی</div>
-      <p class="soon-sub">حتی اعضای VIP هنوز پیش‌نمایشی ندارند — اما اولین طرح‌های اولیه، زودتر از همه اینجا منتشر می‌شود.</p>
-    </div>
+  <div class="view" id="v-vip-anime">
+    <span class="tag reveal">EXCLUSIVE</span><h2 class="st reveal">اخبار <b>اختصاصی</b></h2>
+    <div class="grid" id="vipNewsGrid"></div>
   </div>
 </div>
 
-<!-- ============================================================= -->
-<!-- ADMIN AREA (بخش ادمین)                                         -->
-<!-- ============================================================= -->
-<div class="area-container" id="area-admin">
-
-  <div class="view active" id="view-admin-gate">
-    <div class="admin-gate">
-      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-      <h2 class="section-title" style="margin:0;">ورود به بخش ادمین</h2>
-      <form onsubmit="return checkAdminPass(event)" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-        <input type="password" id="adminPassInput" placeholder="رمز ادمین" style="padding:13px 18px;border-radius:100px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);font-family:var(--fa);width:220px;text-align:center;letter-spacing:3px;">
-        <button class="btn btn-solid" type="submit">ورود</button>
+<div class="area" id="a-admin">
+  <div class="view active" id="v-admin-gate">
+    <div class="soon">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <h2 class="st" style="margin:0;">ورود به بخش ادمین</h2>
+      <form onsubmit="return aCheck(event)" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+        <input id="admP" type="password" placeholder="رمز ادمین" style="padding:12px 18px;border-radius:100px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);width:200px;text-align:center;letter-spacing:3px;">
+        <button class="btn btn-s" style="width:auto;">ورود</button>
       </form>
-      <div class="vip-err" id="adminErr"></div>
+      <div class="err" id="aErr"></div>
     </div>
   </div>
 
-  <div class="view" id="view-admin-panel">
-    <span class="tag reveal">ADMIN</span>
-    <h2 class="section-title reveal">بخش <b>ادمین</b></h2>
-
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="switchAdminTab('anime')">اخبار انیمه</button>
-      <button class="admin-tab" onclick="switchAdminTab('content2')">محتوای بیشتر</button>
-      <button class="admin-tab" onclick="switchAdminTab('messages')">کاربران و پیام‌ها</button>
-      <button class="admin-tab" onclick="switchAdminTab('settings')">تنظیمات</button>
-      <button class="admin-tab" onclick="switchAdminTab('backup')">پشتیبان</button>
+  <div class="view" id="v-admin-panel">
+    <span class="tag reveal">ADMIN</span><h2 class="st reveal">بخش <b>ادمین</b></h2>
+    <div class="admtabs">
+      <button class="admtab active" onclick="aTab('news')">اخبار</button>
+      <button class="admtab" onclick="aTab('users')">کاربران و پیام‌ها</button>
+      <button class="admtab" onclick="aTab('settings')">تنظیمات</button>
+      <button class="admtab" onclick="aTab('backup')">پشتیبان</button>
     </div>
 
-    <div class="admin-panel active" id="animePanel">
-      <div class="admin-form glass">
-        <h3>افزودن خبر انیمه</h3>
-        <div class="form-group"><label>عنوان</label><input type="text" id="animeTitle" placeholder="عنوان خبر"></div>
-        <div class="form-group"><label>توضیح</label><textarea id="animeDesc" placeholder="توضیح کامل"></textarea></div>
-        <div class="form-group"><label>لینک منبع رسمی</label><input type="url" id="animeLink" placeholder="https://..."></div>
-        <div class="form-group">
-          <label><input type="checkbox" id="animeVip" style="width:auto;display:inline-block;margin-left:6px;"> فقط برای بخش VIP</label>
-        </div>
-        <button class="btn btn-solid" onclick="addAnime()">اضافه کردن</button>
+    <div class="admp active" id="p-news">
+      <div class="glass admform">
+        <h3>افزودن خبر</h3>
+        <div class="fg"><label>عنوان</label><input id="nT"></div>
+        <div class="fg"><label>توضیح</label><textarea id="nD"></textarea></div>
+        <div class="fg"><label>لینک منبع</label><input id="nL"></div>
+        <div class="fg"><label><input type="checkbox" id="nV" style="width:auto;display:inline-block;"> فقط VIP</label></div>
+        <button class="btn btn-s" style="width:auto;" onclick="addNews()">اضافه کردن</button>
       </div>
-      <h3 style="margin:24px 0 14px;font-family:var(--serif);">اخبار موجود</h3>
-      <div id="animeList"></div>
+      <h3 style="margin:20px 0 12px;font-family:var(--serif);">اخبار موجود</h3>
+      <div id="newsList"></div>
     </div>
 
-    <div class="admin-panel" id="content2Panel">
-      <div class="admin-form glass">
-        <h3>متن درباره ما</h3>
-        <div class="form-group"><textarea id="aboutInput" placeholder="متن درباره گروه"></textarea></div>
-        <button class="btn btn-solid" onclick="saveAbout()">ذخیره</button>
+    <div class="admp" id="p-users">
+      <div class="glass admform">
+        <h3>کاربران: <span id="uCount">0</span></h3>
+        <div id="uList"></div>
       </div>
-
-      <div class="admin-form glass">
-        <h3>افزودن عضو تیم</h3>
-        <div class="form-group"><label>نام</label><input type="text" id="teamName" placeholder="نام عضو"></div>
-        <div class="form-group"><label>نقش</label><input type="text" id="teamRole" placeholder="مثلاً نویسنده، نقاش"></div>
-        <div class="form-group"><label>عکس (اختیاری)</label>
-          <div class="file-upload"><input type="file" id="teamAvatar" class="file-input" accept="image/*"><label class="file-label" for="teamAvatar">آپلود عکس</label></div>
-        </div>
-        <button class="btn btn-solid" onclick="addTeamMember()">افزودن</button>
-      </div>
-      <div id="teamAdminList" style="margin-bottom:24px;"></div>
-
-      <div class="admin-form glass">
-        <h3>افزودن آیتم گالری</h3>
-        <div class="form-group"><label>عنوان</label><input type="text" id="galleryTitle" placeholder="عنوان طرح"></div>
-        <div class="form-group"><label>تصویر</label>
-          <div class="file-upload"><input type="file" id="galleryImage" class="file-input" accept="image/*"><label class="file-label" for="galleryImage">آپلود تصویر</label></div>
-        </div>
-        <button class="btn btn-solid" onclick="addGalleryItem()">افزودن</button>
-      </div>
-      <div id="galleryAdminList" style="margin-bottom:24px;"></div>
-
-      <div class="admin-form glass">
-        <h3>افزودن یادداشت وبلاگ</h3>
-        <div class="form-group"><label>عنوان</label><input type="text" id="blogTitle" placeholder="عنوان یادداشت"></div>
-        <div class="form-group"><label>متن</label><textarea id="blogText" placeholder="متن یادداشت"></textarea></div>
-        <button class="btn btn-solid" onclick="addBlogPost()">انتشار</button>
-      </div>
-      <div id="blogAdminList" style="margin-bottom:24px;"></div>
-
-      <div class="admin-form glass">
-        <h3>درخواست‌های همکاری</h3>
-        <div id="joinAdminList"></div>
+      <div class="glass admform">
+        <h3>پیام‌های تماس</h3>
+        <div id="mList"></div>
       </div>
     </div>
 
-    <div class="admin-panel" id="messagesPanel">
-      <div class="admin-form glass">
-        <h3>کاربران ثبت‌نام شده: <span id="userCount">0</span></h3>
-        <div id="usersList" style="display:flex;flex-direction:column;gap:10px;margin-bottom:10px;"></div>
-      </div>
-      <div class="admin-form glass">
-        <h3>پیام‌های دریافتی از فرم تماس</h3>
-        <div id="messagesList" style="display:flex;flex-direction:column;gap:10px;"></div>
-      </div>
-    </div>
-
-    <div class="admin-panel" id="settingsPanel">
-      <div class="admin-form glass">
+    <div class="admp" id="p-settings">
+      <div class="glass admform">
         <h3>هویت سایت</h3>
-        <div class="form-group"><label>نام سایت / برند</label><input type="text" id="siteNameInput" placeholder="نام گروه یا برند خود را وارد کنید"></div>
-        <div class="form-group"><label>لوگو</label>
-          <div class="file-upload">
-            <input type="file" id="logoInput" class="file-input" accept="image/*">
-            <label class="file-label" for="logoInput">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 16V4M6 10l6-6 6 6"/><path d="M4 20h16"/></svg>
-              آپلود لوگو
-            </label>
-          </div>
-        </div>
-        <div class="form-group"><label>ایمیل تماس (نمایش در بخش ارتباط با ما)</label><input type="email" id="contactEmailInput" placeholder="email@example.com"></div>
-        <button class="btn btn-solid" onclick="saveSiteSettings()">ذخیره</button>
+        <div class="fg"><label>نام سایت</label><input id="sName"></div>
+        <div class="fg"><label>لوگو</label><div class="fu"><input type="file" id="sLogo" accept="image/*"><label for="sLogo">آپلود لوگو</label></div></div>
+        <div class="fg"><label>متن درباره ما</label><textarea id="sAbout"></textarea></div>
+        <div class="fg"><label>موزیک پس‌زمینه (فایل خودت)</label><div class="fu"><input type="file" id="sMusic" accept="audio/*"><label for="sMusic">آپلود موزیک</label></div></div>
+        <button class="btn btn-s" style="width:auto;" onclick="saveSettings()">ذخیره</button>
       </div>
-
-      <div class="admin-form glass">
-        <h3>رمزهای عبور</h3>
-        <div class="form-group"><label>رمز فعلی ادمین</label><input type="password" id="curAdminPass"></div>
-        <div class="form-group"><label>رمز جدید ادمین</label><input type="password" id="newAdminPass"></div>
-        <button class="btn btn-solid" onclick="changeAdminPass()">تغییر رمز ادمین</button>
-        <div id="msgSecurity" style="margin-top:10px;font-size:12.5px;"></div>
-        <hr style="border-color:var(--line);margin:20px 0;">
-        <div class="form-group"><label>رمز جدید VIP</label><input type="text" id="newVipPass" placeholder="رمز تازه برای بخش VIP"></div>
-        <button class="btn btn-solid" onclick="changeVipPass()">تغییر رمز VIP</button>
-        <div id="msgVip" style="margin-top:10px;font-size:12.5px;"></div>
+      <div class="glass admform">
+        <h3>رمزها</h3>
+        <div class="fg"><label>رمز فعلی ادمین</label><input type="password" id="curAP"></div>
+        <div class="fg"><label>رمز جدید ادمین</label><input type="password" id="newAP"></div>
+        <button class="btn btn-o" onclick="changeAP()">تغییر رمز ادمین</button>
+        <div class="fg" style="margin-top:14px;"><label>رمز جدید VIP</label><input id="newVP"></div>
+        <button class="btn btn-o" onclick="changeVP()">تغییر رمز VIP</button>
+        <div class="err" id="secMsg" style="color:#fff;"></div>
       </div>
     </div>
 
-    <div class="admin-panel" id="backupPanel">
-      <div class="admin-form glass">
-        <h3>مدیریت پشتیبان</h3>
-        <button class="btn btn-solid" onclick="exportBackup()" style="margin-bottom:14px;">دانلود پشتیبان</button>
-        <div class="form-group"><label>بارگذاری پشتیبان</label><input type="file" id="backupFile" accept=".json" onchange="importBackup(event)"></div>
-        <button class="btn btn-danger" onclick="resetSite()" style="margin-top:14px;">بازنشانی سایت</button>
+    <div class="admp" id="p-backup">
+      <div class="glass admform">
+        <h3>پشتیبان</h3>
+        <button class="btn btn-s" style="width:auto;" onclick="expBackup()">دانلود پشتیبان</button>
+        <div class="fg" style="margin-top:14px;"><label>بارگذاری پشتیبان</label><input type="file" id="impFile" accept=".json" onchange="impBackup(event)"></div>
+        <button class="btn btn-d" style="margin-top:12px;" onclick="if(confirm('مطمئنی؟'))location.reload();">بازنشانی سایت</button>
       </div>
     </div>
   </div>
 </div>
 
-<footer>
-  <p id="footerText">© گروه ساخت مانگا</p>
-</footer>
+<div id="ndv">
+  <button class="ndback" onclick="document.getElementById('ndv').classList.remove('active')">→ بازگشت</button>
+  <div class="ndhero" id="ndHero"></div>
+  <span class="tag" id="ndTag">NEWS</span>
+  <h1 class="ndtitle" id="ndTitle"></h1>
+  <p class="ndbody" id="ndBody"></p>
+  <div id="ndSrc"></div>
+</div>
+
+<footer><p id="fText">© گروه ساخت مانگا</p><p style="margin-top:6px;font-size:10px;">نسخه ۱.۰.۰</p></footer>
 
 <script>
-/* ============================================================
-   ICON LIBRARY
-   ============================================================ */
-const ICONS = {
-  tv:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="13" rx="2"/><path d="M8 21h8M12 18v3"/></svg>`,
-  book:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c0-1 1-2 2-2h6v18H6c-1 0-2-1-2-2Z"/><path d="M12 3h6c1 0 2 1 2 2v14c0 1-1 2-2 2h-6"/></svg>`,
-  lock:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>`,
-  chat:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8l-4 4Z"/></svg>`,
-  user:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>`,
-  home:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>`,
-  settings:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>`,
-  external:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4 10 14M20 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></svg>`,
-};
+const D={siteName:'',logo:'',about:'یک گروه کوچک برای ساخت مانگای اورجینال. در ابتدای راهیم.',adminPass:'2580',vipPass:'0852',music:'',
+news:[
+{t:'Jujutsu Kaisen',d:'داستان نفرین و جادوگران؛ یکی از پرمخاطب‌ترین انیمه‌های سال‌های اخیر.',l:'https://jujutsukaisen.jp/',v:false},
+{t:'Solo Leveling',d:'اقتباس از مانهوای پرطرفدار کره‌ای با انیمیشن‌سازی سطح بالا.',l:'https://sololeveling-anime.net/',v:false},
+{t:'One Piece',d:'طولانی‌ترین و محبوب‌ترین مانگای در حال انتشار جهان.',l:'https://one-piece.com/',v:false},
+{t:'Chainsaw Man',d:'فصل دوم این انیمه پرطرفدار در دست ساخت است.',l:'https://chainsawman.dog/',v:true},
+{t:'Attack on Titan',d:'مبارزه‌ی بشریت در برابر تایتان‌های غول‌پیکر.',l:'https://shingeki.tv/',v:false},
+{t:'Demon Slayer',d:'ماجراجویی یک نوجوان با جلوه‌های بصری خیره‌کننده.',l:'https://kimetsu.com/',v:false},
+{t:'My Hero Academia',d:'دنیایی که اکثر مردم ابرقدرت دارند.',l:'https://heroaca.com/',v:false},
+{t:'Spy x Family',d:'کمدی و اکشن جاسوسی درباره یک خانواده ساختگی.',l:'https://spy-family.net/',v:false},
+{t:'Tokyo Revengers',d:'سفر در زمان برای نجات دوستان.',l:'https://tokyo-revengers.jp/',v:false},
+{t:'Bleach',d:'ماجراهای یک شینیگامی؛ از کلاسیک‌های شونن.',l:'https://www.viz.com/bleach',v:false},
+{t:'Dragon Ball',d:'از پایه‌گذارترین آثار ژانر اکشن/ماجراجویی.',l:'https://dragonball-official.com/',v:false},
+{t:'Hunter x Hunter',d:'جست‌وجوی یک پسر برای پدرش در دنیایی خطرناک.',l:'https://hunterxhunter.jp/',v:true},
+{t:'Black Clover',d:'پسری بی‌قدرت که رویای پادشاه جادوگران شدن دارد.',l:'https://black-clover.jp/',v:false},
+{t:'Vinland Saga',d:'حماسه‌ای تاریخی درباره وایکینگ‌ها.',l:'https://vinlandsaga.jp/',v:false},
+{t:'Mob Psycho 100',d:'نوجوانی با قدرت روانی که فقط زندگی عادی می‌خواهد.',l:'https://mobpsycho100.com/',v:false},
+{t:'Haikyu!!',d:'روایت پرانرژی از یک تیم والیبال دبیرستانی.',l:'https://haikyu.jp/',v:false},
+{t:'Frieren',d:'داستانی آرام و فلسفی درباره یک جادوگر الف.',l:'https://frieren-anime.jp/',v:true},
+{t:'Elden Ring: Shadow of the Erdtree',d:'بزرگ‌ترین بسته الحاقی الدن رینگ.',l:'https://en.bandainamcoent.eu/elden-ring/elden-ring',v:false},
+{t:'Black Myth: Wukong',d:'اکشن نقش‌آفرینی الهام‌گرفته از سفر به غرب.',l:'https://www.blackmyth.com/',v:false},
+{t:'Baldur’s Gate 3',d:'یکی از عمیق‌ترین بازی‌های نقش‌آفرینی سال‌های اخیر.',l:'https://baldursgate3.game/',v:false}],
+users:[],messages:[]};
 
-const MENU_ITEMS = [
-  {area:'public', view:'home', label:'خانه', icon:'home'},
-  {area:'public', view:'anime', label:'اخبار انیمه', icon:'tv'},
-  {area:'public', view:'manga', label:'مانگای ما', icon:'book'},
-  {area:'public', view:'contact', label:'ارتباط با ما', icon:'chat'},
-  {area:'public', view:'signup', label:'ثبت‌نام', icon:'user'},
-  {area:'public', view:'about', label:'درباره ما', icon:'chat'},
-  {area:'public', view:'team', label:'تیم ما', icon:'user'},
-  {area:'public', view:'gallery', label:'گالری', icon:'book'},
-  {area:'public', view:'blog', label:'یادداشت‌ها', icon:'tv'},
-  {area:'public', view:'join', label:'همکاری با ما', icon:'user'},
-  {area:'vip', view:null, label:'دسترسی VIP', icon:'lock'},
-  {area:'admin', view:null, label:'بخش ادمین', icon:'settings'},
-];
-document.getElementById('menuPanelLinks').innerHTML = MENU_ITEMS.map(m=>
-  `<a onclick="switchArea('${m.area}'); ${m.view?`switchView('${m.area}','${m.view}');`:''} closeMenuPanel();">${ICONS[m.icon]}${m.label}</a>`).join('');
+let hasAcc=false,vipOK=false,admOK=false,curArea='public',musicOn=false;
 
-/* ============================================================
-   DATA — no fabricated stats. Owner fills identity via admin.
-   ============================================================ */
-const siteData = {
-  siteName:'',
-  logoDataUrl:'',
-  contactEmail:'',
-  adminPass:'2580',
-  vipPass:'0852',
-  anime:[
-    {title:'Jujutsu Kaisen', desc:'ادامه داستان نفرین و جادوگران، یکی از پرمخاطب‌ترین انیمه‌های در حال پخش.', link:'https://jujutsukaisen.jp/', vip:false},
-    {title:'Solo Leveling', desc:'اقتباس از مانهوای پرطرفدار کره‌ای با کیفیت انیمیشن بالا.', link:'https://sololeveling-anime.net/', vip:false},
-    {title:'One Piece', desc:'طولانی‌ترین و محبوب‌ترین مانگای در حال انتشار جهان.', link:'https://one-piece.com/', vip:false},
-    {title:'Chainsaw Man', desc:'فصل دوم انیمه پرطرفدار چین‌سا من در دست ساخت است.', link:'https://chainsawman.dog/', vip:true},
-  ],
-  messages:[],
-  users:[],
-  joinRequests:[],
-  about:'یک گروه کوچک و مستقل که دور هم جمع شده تا مانگای اورجینال بسازد. هنوز در ابتدای راهیم؛ همین‌جا قدم‌به‌قدم با شما به اشتراک می‌گذاریم.',
-  team:[],
-  gallery:[],
-  blog:[],
-};
+function genPage(seed){let s=0;for(const c of seed)s+=c.charCodeAt(0);const r=()=>{s=(s*9301+49297)%233280;return s/233280;};
+let p='';const rows=3+Math.floor(r()*2),cols=2+Math.floor(r()*2),W=220,H=300,cw=W/cols,ch=H/rows;
+for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){const sh=20+Math.floor(r()*70);p+=`<rect x="${x*cw+2}" y="${y*ch+2}" width="${cw-4}" height="${ch-4}" fill="rgb(${sh},${sh},${sh})" stroke="#fff" stroke-width="1.2"/>`;}
+const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#0a0a0a"/>${p}</svg>`;
+return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);}
+const PC={};function pageBg(k){if(!PC[k])PC[k]=genPage(k);return PC[k];}
 
-/* ============================================================
-   AREA / VIEW SWITCHING
-   ============================================================ */
-let vipUnlocked=false, adminUnlocked=false;
+const MENU=[['public','home','خانه'],['public','anime','اخبار انیمه'],['public','manga','مانگای ما'],['public','contact','ارتباط با ما'],['public','signup','ثبت‌نام'],['public','about','درباره ما']];
+document.getElementById('mLinks').innerHTML=MENU.map(m=>`<a onclick="sArea('${m[0]}');sView('${m[0]}','${m[1]}');cMenu();">${m[2]}</a>`).join('')+`<a onclick="sArea('vip');cMenu();">دسترسی VIP</a><a onclick="sArea('admin');cMenu();">بخش ادمین</a>`;
 
-function switchArea(area){
-  document.querySelectorAll('.area-container').forEach(a=>a.classList.remove('active'));
-  document.getElementById('area-'+area).classList.add('active');
-  document.querySelectorAll('.area-btn').forEach(b=>b.classList.toggle('active', b.dataset.area===area));
+function sArea(a){curArea=a;document.querySelectorAll('.area').forEach(x=>x.classList.remove('active'));document.getElementById('a-'+a).classList.add('active');
+document.querySelectorAll('.area-btn').forEach(b=>b.classList.toggle('active',b.dataset.a===a));
+if(a==='vip'){if(hasAcc)vipOK=true;document.querySelectorAll('#a-vip .view').forEach(v=>v.classList.remove('active'));document.getElementById(vipOK?'v-vip-home':'v-vip-gate').classList.add('active');if(vipOK)renderNews();}
+if(a==='admin'){document.querySelectorAll('#a-admin .view').forEach(v=>v.classList.remove('active'));document.getElementById(admOK?'v-admin-panel':'v-admin-gate').classList.add('active');if(admOK)renderAdmin();}
+window.scrollTo({top:0,behavior:'smooth'});cMenu();reveal();}
+function sView(a,v){document.querySelectorAll('#a-'+a+' .view').forEach(x=>x.classList.remove('active'));document.getElementById('v-'+a+'-'+v).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});cMenu();reveal();}
+function aTab(t){document.querySelectorAll('.admp').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.admtab').forEach(b=>b.classList.remove('active'));document.getElementById('p-'+t).classList.add('active');event.target.classList.add('active');renderAdmin();}
+function oMenu(){document.getElementById('mPanel').classList.add('open');document.getElementById('mOv').classList.add('open');}
+function cMenu(){document.getElementById('mPanel').classList.remove('open');document.getElementById('mOv').classList.remove('open');}
+function reveal(){document.querySelectorAll('.area.active .view.active .reveal:not(.in)').forEach(el=>el.classList.add('in'));}
 
-  if(area==='vip'){
-    document.querySelectorAll('#area-vip .view').forEach(v=>v.classList.remove('active'));
-    document.getElementById(vipUnlocked?'view-vip-home':'view-vip-gate').classList.add('active');
-  }
-  if(area==='admin'){
-    document.querySelectorAll('#area-admin .view').forEach(v=>v.classList.remove('active'));
-    document.getElementById(adminUnlocked?'view-admin-panel':'view-admin-gate').classList.add('active');
-    if(adminUnlocked) renderAdmin();
-  }
-  window.scrollTo({top:0,behavior:'smooth'});
-  closeMenuPanel();
-  observeReveals();
-}
+function gtab(t){document.querySelectorAll('#gate .tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('#gate .form-x').forEach(x=>x.classList.remove('active'));
+document.querySelector(`#gate .tab:nth-child(${t==='su'?1:2})`).classList.add('active');document.getElementById(t+'Form').classList.add('active');
+document.getElementById('gtTitle').textContent=t==='su'?'به گروه بپیوند':'خوش برگشتی';document.getElementById('gtSub').textContent=t==='su'?'ثبت‌نام رایگان و سریع':'وارد حساب خودت شو';}
+function gSignup(e){e.preventDefault();D.users.push({name:suN.value.trim(),username:suU.value.trim(),email:suE.value.trim(),pass:suP.value,date:new Date().toLocaleString('fa-IR')});proceed(true);return false;}
+function gLogin(e){e.preventDefault();const u=D.users.find(x=>x.username===liU.value.trim()&&x.pass===liP.value);if(!u){liErr.textContent='کاربری پیدا نشد';return false;}proceed(true);return false;}
+function gAdmin(e){e.preventDefault();if(gaP.value===D.adminPass){admOK=true;proceed(true,'admin');}else{gaErr.textContent='رمز اشتباه است';}return false;}
+function proceed(acc,land){hasAcc=acc;document.getElementById('gate').classList.add('hide');
+if(D.music){bgA.src=D.music;bgA.volume=.5;bgA.play().then(()=>musicOn=true).catch(()=>{});}
+setTimeout(()=>{document.getElementById('gate').style.display='none';runLoader(land);},450);}
 
-function switchView(area, view){
-  document.querySelectorAll('#area-'+area+' .view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('view-'+area+'-'+view).classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
-  closeMenuPanel();
-  observeReveals();
-}
+function runLoader(land){const el=document.getElementById('lw');const fs=['f1','f2','f3'];let i=0;
+const cyc=setInterval(()=>{el.classList.add('fade');setTimeout(()=>{el.classList.remove(fs[i]);i=(i+1)%3;el.classList.add(fs[i]);el.classList.remove('fade');},450);},1400);
+setTimeout(()=>{clearInterval(cyc);const ld=document.getElementById('loader');ld.classList.add('crumple');
+setTimeout(()=>{ld.style.display='none';document.body.classList.add('on');if(land==='admin')sArea('admin');renderAdmin();startPrompts();},900);},4300);}
 
-function switchAdminTab(tab){
-  document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById(tab+'Panel').classList.add('active');
-  event.target.classList.add('active');
-  renderAdmin();
-}
+function vCheck(e){e.preventDefault();if(vipP.value===D.vipPass){vipOK=true;vErr.textContent='';document.getElementById('v-vip-gate').classList.remove('active');document.getElementById('v-vip-home').classList.add('active');renderNews();reveal();}else{vErr.textContent='رمز اشتباه است';}return false;}
+function vLogout(){vipOK=false;sArea('public');sView('public','home');}
+function aCheck(e){e.preventDefault();if(admP.value===D.adminPass){admOK=true;aErr.textContent='';document.getElementById('v-admin-gate').classList.remove('active');document.getElementById('v-admin-panel').classList.add('active');renderAdmin();}else{aErr.textContent='رمز اشتباه است';}return false;}
 
-/* ============================================================
-   VIP / ADMIN GATES
-   ============================================================ */
-function checkVipPass(e){
-  e.preventDefault();
-  const val=document.getElementById('vipPassInput').value;
-  if(val===siteData.vipPass){
-    vipUnlocked=true;
-    document.getElementById('vipErr').textContent='';
-    document.getElementById('view-vip-gate').classList.remove('active');
-    document.getElementById('view-vip-home').classList.add('active');
-    renderVipAnime();
-    observeReveals();
-    showToast('به بخش VIP خوش آمدید');
-  }else{
-    document.getElementById('vipErr').textContent='رمز اشتباه است';
-  }
-  return false;
-}
-function vipLogout(){
-  vipUnlocked=false;
-  switchArea('public');
-  switchView('public','home');
-  showToast('از بخش VIP خارج شدید');
-}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3000);}
+function srcLink(l){return `<a class="src" href="${l}" target="_blank">مشاهده منبع →</a>`;}
 
-function checkAdminPass(e){
-  e.preventDefault();
-  const val=document.getElementById('adminPassInput').value;
-  if(val===siteData.adminPass){
-    adminUnlocked=true;
-    document.getElementById('adminErr').textContent='';
-    document.getElementById('view-admin-gate').classList.remove('active');
-    document.getElementById('view-admin-panel').classList.add('active');
-    renderAdmin();
-  }else{
-    document.getElementById('adminErr').textContent='رمز اشتباه است';
-  }
-  return false;
+function renderNews(){
+const pub=D.news.filter(n=>!n.v);
+document.getElementById('newsGrid').innerHTML=pub.map(n=>{const idx=D.news.indexOf(n);return `<div class="ntile glass reveal" style="background-image:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.72)),url('${pageBg(n.t)}')" onclick="openND(${idx})"><b>${n.t}</b><small>مشاهده کامل ←</small></div>`;}).join('');
+document.getElementById('vipNewsGrid').innerHTML=D.news.map((n,i)=>`<div class="ntile glass reveal" style="background-image:linear-gradient(rgba(0,0,0,.72),rgba(0,0,0,.72)),url('${pageBg(n.t)}')" onclick="openND(${i})">${n.v?'<span class="vipb">VIP</span>':''}<b>${n.t}</b><small>مشاهده کامل ←</small></div>`).join('');
 }
+function openND(i){const n=D.news[i];document.getElementById('ndTag').textContent=n.v?'VIP NEWS':'NEWS';document.getElementById('ndTitle').textContent=n.t;document.getElementById('ndBody').textContent=n.d;document.getElementById('ndHero').style.backgroundImage=`url('${pageBg(n.t+'x')}')`;document.getElementById('ndSrc').innerHTML=srcLink(n.l);document.getElementById('ndv').classList.add('active');window.scrollTo(0,0);}
 
-/* ============================================================
-   MENU PANEL
-   ============================================================ */
-function openMenuPanel(){document.getElementById('menuPanel').classList.add('open');document.getElementById('menuOverlay').classList.add('open');}
-function closeMenuPanel(){document.getElementById('menuPanel').classList.remove('open');document.getElementById('menuOverlay').classList.remove('open');}
+function sContact(e){e.preventDefault();D.messages.unshift({name:cN.value,email:cE.value,msg:cM.value,date:new Date().toLocaleString('fa-IR')});cN.value='';cE.value='';cM.value='';toast('پیام ارسال شد');return false;}
+function sSignup(e){e.preventDefault();D.users.push({name:suN2.value,username:suU2.value,email:suE2.value,pass:suP2.value,date:new Date().toLocaleString('fa-IR')});hasAcc=true;suN2.value='';suU2.value='';suE2.value='';suP2.value='';renderAdmin();toast('حساب ساخته شد');return false;}
 
-/* ============================================================
-   TOAST
-   ============================================================ */
-function showToast(msg){
-  const t=document.createElement('div');
-  t.className='toast'; t.textContent=msg;
-  document.body.appendChild(t);
-  setTimeout(()=>t.remove(),3200);
-}
-function flashMsg(id,msg,ok=true){
-  const el=document.getElementById(id);
-  if(el){el.textContent=msg; el.style.color= ok? '#fff':'#ff7a6a';}
-}
-
-/* ============================================================
-   RENDER: PUBLIC ANIME / VIP ANIME
-   ============================================================ */
-function sourceLink(url){
-  return `<a class="card-source" href="${url}" target="_blank" rel="noopener">مشاهده منبع ${ICONS.external}</a>`;
-}
-function renderAnime(){
-  const pub = siteData.anime.filter(a=>!a.vip);
-  document.getElementById('animeContainer').innerHTML = pub.map(a=>`
-    <div class="card glass reveal">
-      <div class="card-media">${ICONS.tv}</div>
-      <div class="card-body">
-        <div class="card-title">${a.title}</div>
-        <div class="card-desc">${a.desc}</div>
-        <div class="card-foot">${sourceLink(a.link)}</div>
-      </div>
-    </div>`).join('') || `<p style="color:var(--dim);">هنوز خبری ثبت نشده است.</p>`;
-}
-function renderVipAnime(){
-  document.getElementById('vipAnimeContainer').innerHTML = siteData.anime.map(a=>`
-    <div class="card glass reveal" style="position:relative;">
-      ${a.vip?'<span class="vip-badge">VIP</span>':''}
-      <div class="card-media">${ICONS.tv}</div>
-      <div class="card-body">
-        <div class="card-title">${a.title}</div>
-        <div class="card-desc">${a.desc}</div>
-        <div class="card-foot">${sourceLink(a.link)}</div>
-      </div>
-    </div>`).join('');
-}
-
-function renderAbout(){
-  document.getElementById('aboutText').textContent = siteData.about;
-}
-function renderTeam(){
-  document.getElementById('teamContainer').innerHTML = siteData.team.map(m=>`
-    <div class="card glass reveal">
-      <div class="card-media">${m.avatar?`<img src="${m.avatar}" style="width:100%;height:100%;object-fit:cover;">`:ICONS.user}</div>
-      <div class="card-body">
-        <div class="card-title">${m.name}</div>
-        <div class="card-desc">${m.role}</div>
-      </div>
-    </div>`).join('') || `<p style="color:var(--dim);">اعضای تیم به‌زودی معرفی می‌شوند.</p>`;
-}
-function renderGallery(){
-  document.getElementById('galleryContainer').innerHTML = siteData.gallery.map(g=>`
-    <div class="card glass reveal">
-      <div class="card-media">${g.image?`<img src="${g.image}" style="width:100%;height:100%;object-fit:cover;">`:''}</div>
-      <div class="card-body"><div class="card-title">${g.title}</div></div>
-    </div>`).join('') || `<p style="color:var(--dim);">هنوز طرحی منتشر نشده — به‌زودی.</p>`;
-}
-function renderBlog(){
-  document.getElementById('blogContainer').innerHTML = siteData.blog.map(b=>`
-    <div class="card glass reveal">
-      <div class="card-body">
-        <div class="card-title">${b.title}</div>
-        <div class="card-desc">${b.text}</div>
-        <div class="card-foot"><span>${b.date}</span></div>
-      </div>
-    </div>`).join('') || `<p style="color:var(--dim);">هنوز یادداشتی منتشر نشده.</p>`;
-}
-function submitJoin(e){
-  e.preventDefault();
-  const name=document.getElementById('jName').value.trim();
-  const skill=document.getElementById('jSkill').value.trim();
-  const contact=document.getElementById('jContact').value.trim();
-  const msg=document.getElementById('jMsg').value.trim();
-  if(!name||!skill||!contact) return false;
-  siteData.joinRequests.unshift({name,skill,contact,msg,date:new Date().toLocaleString('fa-IR')});
-  document.getElementById('jName').value='';
-  document.getElementById('jSkill').value='';
-  document.getElementById('jContact').value='';
-  document.getElementById('jMsg').value='';
-  showToast('درخواست همکاری ارسال شد');
-  return false;
-}
-
-/* ============================================================
-   CONTACT FORM
-   ============================================================ */
-function submitContact(e){
-  e.preventDefault();
-  const name=document.getElementById('cName').value.trim();
-  const email=document.getElementById('cEmail').value.trim();
-  const msg=document.getElementById('cMsg').value.trim();
-  if(!name||!email||!msg) return false;
-  siteData.messages.unshift({name,email,msg,date:new Date().toLocaleString('fa-IR')});
-  document.getElementById('cName').value='';
-  document.getElementById('cEmail').value='';
-  document.getElementById('cMsg').value='';
-  showToast('پیام شما ارسال شد، ممنون از تماست');
-  return false;
-}
-
-/* ============================================================
-   SIGNUP FORM
-   ============================================================ */
-function submitSignup(e){
-  e.preventDefault();
-  const name=document.getElementById('suName').value.trim();
-  const username=document.getElementById('suUsername').value.trim();
-  const email=document.getElementById('suEmail').value.trim();
-  const pass=document.getElementById('suPass').value;
-  if(!name||!username||!email||!pass) return false;
-  if(siteData.users.some(u=>u.username===username)){
-    showToast('این نام کاربری قبلاً ثبت شده');
-    return false;
-  }
-  siteData.users.push({name,username,email,pass,date:new Date().toLocaleString('fa-IR')});
-  hasAccount = true;
-  document.getElementById('suName').value='';
-  document.getElementById('suUsername').value='';
-  document.getElementById('suEmail').value='';
-  document.getElementById('suPass').value='';
-  renderAdmin();
-  showToast('حساب شما ساخته شد، خوش آمدی!');
-  return false;
-}
-
-/* ============================================================
-   ADMIN: CONTENT MANAGEMENT
-   ============================================================ */
-function addAnime(){
-  const title=document.getElementById('animeTitle').value.trim();
-  const desc=document.getElementById('animeDesc').value.trim();
-  const link=document.getElementById('animeLink').value.trim()||'#';
-  const vip=document.getElementById('animeVip').checked;
-  if(!title||!desc) return showToast('عنوان و توضیح ضروری است');
-  siteData.anime.unshift({title,desc,link,vip});
-  document.getElementById('animeTitle').value='';
-  document.getElementById('animeDesc').value='';
-  document.getElementById('animeLink').value='';
-  document.getElementById('animeVip').checked=false;
-  renderAnime(); renderVipAnime(); renderAdmin();
-  showToast('خبر اضافه شد');
-}
-function removeAnime(i){
-  siteData.anime.splice(i,1);
-  renderAnime(); renderVipAnime(); renderAdmin();
-  showToast('خبر حذف شد');
-}
-function removeUser(i){
-  siteData.users.splice(i,1);
-  renderAdmin();
-  showToast('کاربر حذف شد');
-}
-
-function saveAbout(){
-  siteData.about = document.getElementById('aboutInput').value.trim();
-  renderAbout();
-  showToast('متن درباره ما ذخیره شد');
-}
-
-function addTeamMember(){
-  const name=document.getElementById('teamName').value.trim();
-  const role=document.getElementById('teamRole').value.trim();
-  if(!name||!role) return showToast('نام و نقش ضروری است');
-  const file=document.getElementById('teamAvatar').files[0];
-  const push=(avatar)=>{
-    siteData.team.push({name,role,avatar:avatar||''});
-    document.getElementById('teamName').value=''; document.getElementById('teamRole').value='';
-    document.getElementById('teamAvatar').value='';
-    renderTeam(); renderAdmin(); showToast('عضو تیم اضافه شد');
-  };
-  if(file){ const r=new FileReader(); r.onload=(e)=>push(e.target.result); r.readAsDataURL(file); }
-  else push('');
-}
-function removeTeamMember(i){ siteData.team.splice(i,1); renderTeam(); renderAdmin(); showToast('عضو حذف شد'); }
-
-function addGalleryItem(){
-  const title=document.getElementById('galleryTitle').value.trim();
-  const file=document.getElementById('galleryImage').files[0];
-  if(!title) return showToast('عنوان ضروری است');
-  const push=(image)=>{
-    siteData.gallery.push({title,image:image||''});
-    document.getElementById('galleryTitle').value=''; document.getElementById('galleryImage').value='';
-    renderGallery(); renderAdmin(); showToast('به گالری اضافه شد');
-  };
-  if(file){ const r=new FileReader(); r.onload=(e)=>push(e.target.result); r.readAsDataURL(file); }
-  else push('');
-}
-function removeGalleryItem(i){ siteData.gallery.splice(i,1); renderGallery(); renderAdmin(); showToast('آیتم حذف شد'); }
-
-function addBlogPost(){
-  const title=document.getElementById('blogTitle').value.trim();
-  const text=document.getElementById('blogText').value.trim();
-  if(!title||!text) return showToast('عنوان و متن ضروری است');
-  siteData.blog.unshift({title,text,date:new Date().toLocaleString('fa-IR')});
-  document.getElementById('blogTitle').value=''; document.getElementById('blogText').value='';
-  renderBlog(); renderAdmin(); showToast('یادداشت منتشر شد');
-}
-function removeBlogPost(i){ siteData.blog.splice(i,1); renderBlog(); renderAdmin(); showToast('یادداشت حذف شد'); }
+function addNews(){if(!nT.value.trim()||!nD.value.trim())return toast('عنوان و توضیح لازمه');D.news.unshift({t:nT.value.trim(),d:nD.value.trim(),l:nL.value.trim()||'#',v:nV.checked});nT.value='';nD.value='';nL.value='';nV.checked=false;renderNews();renderAdmin();toast('خبر اضافه شد');}
+function editNews(i){const n=D.news[i];const t=prompt('عنوان:',n.t);if(t===null)return;const d=prompt('توضیح:',n.d);if(d===null)return;const l=prompt('لینک:',n.l);if(l===null)return;const v=confirm('فقط VIP؟');D.news[i]={t,d,l,v};renderNews();renderAdmin();toast('ویرایش شد');}
+function delNews(i){D.news.splice(i,1);renderNews();renderAdmin();toast('حذف شد');}
+function delUser(i){D.users.splice(i,1);renderAdmin();toast('حذف شد');}
 
 function renderAdmin(){
-  document.getElementById('animeList').innerHTML = siteData.anime.map((a,i)=>`
-    <div class="admin-list-item">
-      <span>${a.title}${a.vip?' <b style="color:var(--accent-dim);">(VIP)</b>':''}</span>
-      <button class="btn btn-danger" onclick="removeAnime(${i})">حذف</button>
-    </div>`).join('') || `<p style="color:var(--dim);">هیچ خبری ثبت نشده.</p>`;
+document.getElementById('newsList').innerHTML=D.news.map((n,i)=>`<div class="li"><span>${n.t}${n.v?' (VIP)':''}</span><button class="btn btn-o" onclick="editNews(${i})">ویرایش</button><button class="btn btn-d" onclick="delNews(${i})">حذف</button></div>`).join('');
+document.getElementById('uCount').textContent=D.users.length;
+document.getElementById('uList').innerHTML=D.users.map((u,i)=>`<div class="li"><span>${u.name} — ${u.username}</span><button class="btn btn-d" onclick="delUser(${i})">حذف</button></div>`).join('')||'<p style="color:var(--dim);">کسی ثبت‌نام نکرده.</p>';
+document.getElementById('mList').innerHTML=D.messages.map(m=>`<div class="li" style="flex-direction:column;align-items:flex-start;"><b>${m.name}</b><span style="color:var(--dim);font-size:11px;">${m.email} — ${m.date}</span><span>${m.msg}</span></div>`).join('')||'<p style="color:var(--dim);">پیامی نیست.</p>';
+sName.value=D.siteName;sAbout.value=D.about;
+}
+function saveSettings(){D.siteName=sName.value.trim();D.about=sAbout.value.trim();applyId();toast('ذخیره شد');}
+sLogo.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{D.logo=ev.target.result;applyId();};r.readAsDataURL(f);});
+sMusic.addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{D.music=ev.target.result;bgA.src=D.music;mBtn.style.display='flex';toast('موزیک ذخیره شد');};r.readAsDataURL(f);});
+function tMusic(){if(!bgA.src)return;if(musicOn){bgA.pause();musicOn=false;}else{bgA.play().catch(()=>{});musicOn=true;}mBtn.style.opacity=musicOn?'1':'.5';}
+function applyId(){bName.textContent=D.siteName;bLogo.innerHTML=D.logo?`<img src="${D.logo}">`:'';fText.textContent=D.siteName?'© '+D.siteName:'© تمام حقوق محفوظ است';aboutTxt.textContent=D.about;}
+function changeAP(){if(curAP.value!==D.adminPass)return secMsg.textContent='رمز فعلی اشتباه است';if(newAP.value.length<4)return secMsg.textContent='رمز باید حداقل ۴ کاراکتر باشه';D.adminPass=newAP.value;curAP.value='';newAP.value='';secMsg.textContent='رمز ادمین تغییر کرد';}
+function changeVP(){if(!newVP.value.trim())return;D.vipPass=newVP.value.trim();newVP.value='';secMsg.textContent='رمز VIP تغییر کرد';}
+function expBackup(){const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='backup.json';a.click();}
+function impBackup(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{Object.assign(D,JSON.parse(ev.target.result));renderNews();renderAdmin();applyId();toast('بازیابی شد');}catch(x){toast('فایل معتبر نیست');}};r.readAsText(f);}
 
-  document.getElementById('messagesList').innerHTML = siteData.messages.map(m=>`
-    <div class="admin-list-item" style="align-items:flex-start;flex-direction:column;gap:6px;">
-      <div style="display:flex;justify-content:space-between;width:100%;">
-        <b>${m.name}</b><span style="color:var(--dim);font-size:11px;">${m.date}</span>
-      </div>
-      <span style="color:var(--dim);font-size:12px;">${m.email}</span>
-      <span style="font-size:13px;">${m.msg}</span>
-    </div>`).join('') || `<p style="color:var(--dim);">پیامی دریافت نشده.</p>`;
-
-  document.getElementById('userCount').textContent = siteData.users.length;
-  document.getElementById('usersList').innerHTML = siteData.users.map((u,i)=>`
-    <div class="admin-list-item">
-      <span><b>${u.name}</b> — ${u.username} — ${u.email}</span>
-      <button class="btn btn-danger" onclick="removeUser(${i})">حذف</button>
-    </div>`).join('') || `<p style="color:var(--dim);">هنوز کسی ثبت‌نام نکرده.</p>`;
-
-  document.getElementById('siteNameInput').value = siteData.siteName;
-  document.getElementById('contactEmailInput').value = siteData.contactEmail;
-
-  const aboutInputEl = document.getElementById('aboutInput');
-  if(aboutInputEl) aboutInputEl.value = siteData.about;
-
-  const teamListEl = document.getElementById('teamAdminList');
-  if(teamListEl) teamListEl.innerHTML = siteData.team.map((m,i)=>`
-    <div class="admin-list-item"><span>${m.name} — ${m.role}</span><button class="btn btn-danger" onclick="removeTeamMember(${i})">حذف</button></div>`).join('');
-
-  const galleryListEl = document.getElementById('galleryAdminList');
-  if(galleryListEl) galleryListEl.innerHTML = siteData.gallery.map((g,i)=>`
-    <div class="admin-list-item"><span>${g.title}</span><button class="btn btn-danger" onclick="removeGalleryItem(${i})">حذف</button></div>`).join('');
-
-  const blogListEl = document.getElementById('blogAdminList');
-  if(blogListEl) blogListEl.innerHTML = siteData.blog.map((b,i)=>`
-    <div class="admin-list-item"><span>${b.title}</span><button class="btn btn-danger" onclick="removeBlogPost(${i})">حذف</button></div>`).join('');
-
-  const joinListEl = document.getElementById('joinAdminList');
-  if(joinListEl) joinListEl.innerHTML = siteData.joinRequests.map(j=>`
-    <div class="admin-list-item" style="align-items:flex-start;flex-direction:column;gap:6px;">
-      <div style="display:flex;justify-content:space-between;width:100%;"><b>${j.name}</b><span style="color:var(--dim);font-size:11px;">${j.date}</span></div>
-      <span style="color:var(--dim);font-size:12px;">${j.skill} — ${j.contact}</span>
-      <span style="font-size:13px;">${j.msg||''}</span>
-    </div>`).join('') || `<p style="color:var(--dim);">درخواستی ثبت نشده.</p>`;
+function burst(x,y){for(let i=0;i<12;i++){const s=document.createElement('span');s.className='shard';const a=Math.random()*6.28,d=24+Math.random()*40;s.style.setProperty('--sx',Math.cos(a)*d+'px');s.style.setProperty('--sy',Math.sin(a)*d+'px');s.style.left=x+'px';s.style.top=y+'px';document.body.appendChild(s);setTimeout(()=>s.remove(),650);}}
+function showPrompt(id,h,p,cta,fn){if(document.getElementById(id))return;const el=document.createElement('div');el.className='prompt';el.id=id;
+el.innerHTML=`<button class="pclose" onclick="this.parentElement.remove()">✕</button><h4>${h}</h4><p>${p}</p><div class="pa"><button class="btn btn-s" id="${id}c">${cta}</button><button class="btn btn-o" onclick="this.closest('.prompt').remove()">بعداً</button></div>`;
+document.body.appendChild(el);document.getElementById(id+'c').onclick=()=>{el.remove();fn();};
+const r=el.getBoundingClientRect();burst(r.left+r.width/2,r.top+8);setTimeout(()=>{if(document.getElementById(id))el.remove();},9000);}
+function startPrompts(){
+setInterval(()=>{if(curArea==='admin'||hasAcc)return;showPrompt('sp','هنوز عضو نشدی؟','با ثبت‌نام رایگان زودتر خبردار شو.','ثبت‌نام',()=>{sArea('public');sView('public','signup');});},30000);
+setInterval(()=>{if(curArea==='admin')return;showPrompt('cp','سوالی داری؟','از بخش ارتباط با ما پیام بده.','ارتباط با ما',()=>{sArea('public');sView('public','contact');});},60000);
 }
 
-/* ============================================================
-   ADMIN: SETTINGS (site identity, passwords)
-   ============================================================ */
-function saveSiteSettings(){
-  siteData.siteName = document.getElementById('siteNameInput').value.trim();
-  siteData.contactEmail = document.getElementById('contactEmailInput').value.trim();
-  applyIdentity();
-  showToast('تنظیمات ذخیره شد');
-}
-
-const logoInputEl = document.getElementById('logoInput');
-if(logoInputEl){
-  logoInputEl.addEventListener('change', (e)=>{
-    const file=e.target.files[0]; if(!file) return;
-    const reader=new FileReader();
-    reader.onload=(ev)=>{ siteData.logoDataUrl=ev.target.result; applyIdentity(); showToast('لوگو بارگذاری شد'); };
-    reader.readAsDataURL(file);
-  });
-}
-
-function applyIdentity(){
-  document.getElementById('brandNameEl').textContent = siteData.siteName || '';
-  document.getElementById('brandLogoSlot').innerHTML = siteData.logoDataUrl ? `<img src="${siteData.logoDataUrl}" alt="logo">` : '';
-  document.getElementById('footerText').textContent = siteData.siteName ? `© ${siteData.siteName}` : '© تمام حقوق محفوظ است';
-  document.querySelector('.contact-info .ci-item:nth-child(1) span').innerHTML = `<b>ایمیل</b>${siteData.contactEmail || 'در بخش ادمین تنظیم می‌شود'}`;
-}
-
-function changeAdminPass(){
-  const cur=document.getElementById('curAdminPass').value;
-  const next=document.getElementById('newAdminPass').value;
-  if(cur!==siteData.adminPass) return flashMsg('msgSecurity','رمز فعلی اشتباه است', false);
-  if(!next||next.length<4) return flashMsg('msgSecurity','رمز جدید باید حداقل ۴ کاراکتر باشد', false);
-  siteData.adminPass=next;
-  document.getElementById('curAdminPass').value='';
-  document.getElementById('newAdminPass').value='';
-  flashMsg('msgSecurity','رمز ادمین تغییر کرد');
-}
-function changeVipPass(){
-  const next=document.getElementById('newVipPass').value.trim();
-  if(!next) return flashMsg('msgVip','رمز جدید را وارد کنید', false);
-  siteData.vipPass=next;
-  document.getElementById('newVipPass').value='';
-  flashMsg('msgVip','رمز VIP تغییر کرد');
-}
-
-/* ============================================================
-   BACKUP
-   ============================================================ */
-function exportBackup(){
-  const blob=new Blob([JSON.stringify(siteData,null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download='site-backup.json'; a.click();
-  URL.revokeObjectURL(url); showToast('پشتیبان دانلود شد');
-}
-function importBackup(evt){
-  const file=evt.target.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload=(e)=>{
-    try{
-      Object.assign(siteData, JSON.parse(e.target.result));
-      renderAnime(); renderVipAnime(); renderAdmin(); applyIdentity();
-      showToast('پشتیبان بازیابی شد');
-    }catch(err){ showToast('فایل پشتیبان معتبر نیست'); }
-  };
-  reader.readAsText(file);
-}
-function resetSite(){ if(confirm('تمام تغییرات از بین می‌رود. مطمئنی؟')) location.reload(); }
-
-/* ============================================================
-   SCROLL REVEAL
-   ============================================================ */
-let revealObserver;
-function observeReveals(){
-  if(revealObserver) revealObserver.disconnect();
-  revealObserver = new IntersectionObserver((entries)=>{
-    entries.forEach(en=>{ if(en.isIntersecting){ en.target.classList.add('in'); revealObserver.unobserve(en.target); } });
-  }, {threshold:.12});
-  document.querySelectorAll('.area-container.active .view.active .reveal:not(.in)').forEach(el=>revealObserver.observe(el));
-}
-
-/* ============================================================
-   NAV SCROLL STATE
-   ============================================================ */
-window.addEventListener('scroll', ()=>{
-  document.getElementById('mainNav').classList.toggle('scroll', window.scrollY>40);
-});
-
-/* ============================================================
-   AMBIENT "100 MANGA FRAMES" COLLAGE BACKGROUND
-   Built abstractly (grayscale gradients + halftone + motion) since
-   no external manga artwork can be embedded here. To use real art:
-   loop below sets panel.querySelector('.fill').style.backgroundImage —
-   just point it at your own image URLs.
-   ============================================================ */
-function buildMangaCollage(){
-  const field = document.getElementById('mangaCollage');
-  const outer = document.createElement('div');
-  outer.id = 'collageField';
-  field.appendChild(outer);
-
-  const isMobile = window.innerWidth < 700;
-  const COLS = isMobile ? 9 : 16;
-  const ROWS = isMobile ? 16 : 12;
-  outer.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
-  outer.style.gridTemplateRows = `repeat(${ROWS}, 1fr)`;
-
-  const TOTAL = COLS*ROWS;
-  for(let i=0;i<TOTAL;i++){
-    const tile=document.createElement('div');
-    tile.className='ctile';
-
-    // occasionally span 2 cells to break the grid up like a real comic-page collage
-    if(Math.random()<0.12){
-      tile.style.gridColumn='span 2';
-    }
-    if(Math.random()<0.1){
-      tile.style.gridRow='span 2';
-    }
-
-    const shade = 4 + Math.floor(Math.random()*26);
-    const shade2 = shade + 14 + Math.floor(Math.random()*30);
-    const angle = Math.floor(Math.random()*360);
-    tile.style.animationDuration = (5+Math.random()*9)+'s';
-    tile.style.animationDelay = (Math.random()*-10)+'s';
-
-    const fill=document.createElement('div');
-    fill.className='fill';
-    fill.style.background=`linear-gradient(${angle}deg, rgb(${shade},${shade},${shade}), rgb(${shade2},${shade2},${shade2}))`;
-    // NOTE FOR OWNER: replace abstract tiles with real manga panels — just set:
-    // fill.style.backgroundImage = "url('frames/panel-01.jpg')";
-
-    const tone=document.createElement('div'); tone.className='tone';
-    const lines=document.createElement('div'); lines.className='lines';
-
-    tile.appendChild(fill);
-    tile.appendChild(tone);
-    if(Math.random()<0.4) tile.appendChild(lines);
-    outer.appendChild(tile);
-  }
-}
-buildMangaCollage();
-
-/* ============================================================
-   INIT
-   ============================================================ */
-/* ============================================================
-   PRE-SITE GATE: login / signup / guest
-   ============================================================ */
-let hasAccount = false;
-
-function switchGateTab(tab){
-  document.querySelectorAll('#preGate .auth-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('#preGate .auth-form').forEach(f=>f.classList.remove('active'));
-  document.querySelector(`#preGate .auth-tab:nth-child(${tab==='signup'?1:2})`).classList.add('active');
-  document.getElementById('gate'+(tab==='signup'?'Signup':'Login')+'Form').classList.add('active');
-  document.getElementById('gateTitle').textContent = tab==='signup' ? 'به گروه بپیوند' : 'خوش برگشتی';
-  document.getElementById('gateSubtitle').textContent = tab==='signup' ? 'ثبت‌نام رایگان و سریع' : 'وارد حساب خودت شو';
-}
-
-function gateLogin(e){
-  e.preventDefault();
-  const username=document.getElementById('glUsername').value.trim();
-  const pass=document.getElementById('glPass').value;
-  const user = siteData.users.find(u=>u.username===username && u.pass===pass);
-  if(!user){
-    document.getElementById('gateLoginErr').textContent='کاربری با این مشخصات پیدا نشد';
-    return false;
-  }
-  document.getElementById('gateLoginErr').textContent='';
-  proceedFromGate(true);
-  return false;
-}
-
-function gateSignup(e){
-  e.preventDefault();
-  const name=document.getElementById('gsName').value.trim();
-  const username=document.getElementById('gsUsername').value.trim();
-  const email=document.getElementById('gsEmail').value.trim();
-  const pass=document.getElementById('gsPass').value;
-  if(!name||!username||!email||!pass) return false;
-  siteData.users.push({name,username,email,pass,date:new Date().toLocaleString('fa-IR')});
-  proceedFromGate(true);
-  return false;
-}
-
-function toggleGateAdmin(){
-  document.getElementById('gateAdminForm').classList.toggle('open');
-}
-
-function gateAdminLogin(e){
-  e.preventDefault();
-  const val = document.getElementById('gateAdminPass').value;
-  if(val === siteData.adminPass){
-    document.getElementById('gateAdminErr').textContent='';
-    adminUnlocked = true;
-    proceedFromGate(true, 'admin');
-  }else{
-    document.getElementById('gateAdminErr').textContent='رمز اشتباه است';
-  }
-  return false;
-}
-
-function proceedFromGate(withAccount, landOn){
-  hasAccount = withAccount;
-  document.getElementById('preGate').classList.add('hide');
-  setTimeout(()=>{
-    document.getElementById('preGate').style.display='none';
-    runLoaderThenReveal(landOn);
-  }, 450);
-}
-
-/* ============================================================
-   LOADER → CRUMPLED-PAPER EXIT → SITE REVEAL
-   ============================================================ */
-function runLoaderThenReveal(landOn){
-  setTimeout(()=>{
-    const loader = document.getElementById('loader');
-    loader.classList.add('crumple');
-
-    // animate the SVG turbulence distortion to sell the "crumpling" look
-    const turb = document.getElementById('crumpleTurb');
-    let f = 0.01;
-    const dispEl = document.querySelector('#crumpleFilter feDisplacementMap');
-    const distortInterval = setInterval(()=>{
-      f += 0.06;
-      if(turb) turb.setAttribute('baseFrequency', f.toFixed(3));
-      if(dispEl) dispEl.setAttribute('scale', Math.min(120, f*140).toFixed(0));
-      if(f>0.95) clearInterval(distortInterval);
-    }, 45);
-
-    setTimeout(()=>{
-      loader.style.display='none';
-      document.body.classList.add('site-revealed');
-      if(landOn==='admin'){
-        switchArea('admin');
-      }
-      renderAdmin();
-      startPeriodicPrompts();
-    }, 850);
-  }, 1300);
-}
-
-/* ============================================================
-   PERIODIC PROMPTS — signup nudge every 30s, contact nudge every 60s,
-   each announced with a small black/white "explosion" of shards.
-   ============================================================ */
-function burstAt(x,y){
-  for(let i=0;i<14;i++){
-    const s=document.createElement('span');
-    s.className='burst-shard';
-    const angle = Math.random()*Math.PI*2;
-    const dist = 26+Math.random()*46;
-    s.style.setProperty('--sx', Math.cos(angle)*dist+'px');
-    s.style.setProperty('--sy', Math.sin(angle)*dist+'px');
-    s.style.left = x+'px'; s.style.top = y+'px';
-    s.style.background = Math.random()<0.5 ? '#fff' : '#000';
-    s.style.border = '1px solid rgba(255,255,255,.5)';
-    document.body.appendChild(s);
-    setTimeout(()=>s.remove(), 650);
-  }
-}
-
-function showPromptToast(id, title, desc, ctaLabel, ctaFn){
-  if(document.getElementById(id)) return; // avoid stacking duplicates
-  const el = document.createElement('div');
-  el.className='prompt-toast';
-  el.id = id;
-  el.innerHTML = `
-    <button class="pt-close" onclick="this.parentElement.remove()">✕</button>
-    <h4>${title}</h4>
-    <p>${desc}</p>
-    <div class="pt-actions">
-      <button class="btn btn-solid" style="flex:1;justify-content:center;" id="${id}-cta">${ctaLabel}</button>
-      <button class="btn btn-out" onclick="this.closest('.prompt-toast').remove()">بعداً</button>
-    </div>`;
-  document.body.appendChild(el);
-  document.getElementById(id+'-cta').addEventListener('click', ()=>{ el.remove(); ctaFn(); });
-
-  const rect = el.getBoundingClientRect();
-  burstAt(rect.left+rect.width/2, rect.top+8);
-  setTimeout(()=>{ if(document.getElementById(id)) el.remove(); }, 9000);
-}
-
-function startPeriodicPrompts(){
-  setInterval(()=>{
-    if(!hasAccount){
-      showPromptToast('signupPrompt','هنوز عضو نشدی؟','با ثبت‌نام رایگان، از انتشار مانگا و اخبار جدید زودتر باخبر می‌شوی.','ثبت‌نام',
-        ()=>{ switchArea('public'); switchView('public','signup'); });
-    }
-  }, 30000);
-
-  setInterval(()=>{
-    showPromptToast('contactPrompt','سوالی داری؟','از بخش ارتباط با ما می‌تونی مستقیم با گروه در تماس باشی.','ارتباط با ما',
-      ()=>{ switchArea('public'); switchView('public','contact'); });
-  }, 60000);
-}
-
-/* ============================================================
-   INIT
-   ============================================================ */
-renderAnime();
-renderAbout();
-renderTeam();
-renderGallery();
-renderBlog();
-applyIdentity();
-observeReveals();
+window.addEventListener('scroll',()=>{document.getElementById('nav').classList.toggle('scroll',window.scrollY>40);});
+const hh=new Date().getHours();
+renderNews();applyId();reveal();
+setTimeout(()=>document.getElementById('loader').classList.add('hide'),0);
 </script>
 </body>
 </html>
