@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ir filoom</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+
+:root[data-theme="dark"]{--bg:#0a0a0a;--bg-soft:#141414;--card:#1c1c1c;--text:#f5f5f5;--text-dim:#a9a9a9;--accent:#ff8c00;--accent2:#ff6a00;--glass:rgba(255,140,0,.14);--glass-border:rgba(255,140,0,.35);--headerbg:rgba(10,10,10,.75);}
+:root[data-theme="light"]{--bg:#f2f2f2;--bg-soft:#ffffff;--card:#ffffff;--text:#161616;--text-dim:#666;--accent:#ff7a00;--accent2:#ff9a3d;--glass:rgba(255,140,0,.10);--glass-border:rgba(255,140,0,.30);--headerbg:rgba(255,255,255,.75);}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Vazirmatn',sans-serif;}
+html,body{background:var(--bg);color:var(--text);transition:background .4s,color .4s;}
+body{overflow-x:hidden;padding-bottom:74px;min-height:100vh;}
+a{text-decoration:none;color:inherit;}
+button{font-family:inherit;cursor:pointer;}
+.view{display:none;}
+.view.active{display:block;}
+
+header{position:sticky;top:0;z-index:60;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--headerbg);backdrop-filter:blur(14px);border-bottom:1px solid var(--glass-border);}
+.logo{font-size:1.4rem;font-weight:800;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.menu-trigger{width:40px;height:40px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;background:var(--glass);border:1px solid var(--glass-border);transition:transform .3s;}
+.menu-trigger:hover{transform:scale(1.12) rotate(90deg);}
+.menu-trigger span{width:4px;height:4px;border-radius:50%;background:var(--accent);}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .35s;z-index:70;}
+.overlay.show{opacity:1;pointer-events:auto;}
+
+.side-panel{position:fixed;top:0;right:0;height:100%;width:295px;max-width:85%;background:var(--bg-soft);border-left:1px solid var(--glass-border);transform:translateX(100%);transition:transform .4s cubic-bezier(.2,.9,.3,1.2);z-index:80;padding:20px 16px;overflow-y:auto;}
+.side-panel.open{transform:translateX(0);}
+.sp-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:1px solid var(--glass-border);margin-bottom:10px;}
+.sp-header span{font-weight:700;font-size:1.05rem;}
+.close-btn{background:none;border:none;color:var(--text);cursor:pointer;}
+.close-btn svg{width:22px;height:22px;stroke:var(--text);fill:none;stroke-width:1.8;}
+.sp-item{display:flex;align-items:center;gap:12px;padding:12px 8px;border-radius:12px;cursor:pointer;transition:background .25s;}
+.sp-item:hover{background:var(--glass);}
+.icon-glass{width:38px;height:38px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--glass),rgba(0,0,0,.3));border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;transition:transform .5s;}
+.sp-item:hover .icon-glass{transform:rotate(360deg) scale(1.08);}
+.icon-glass svg{width:18px;height:18px;stroke:var(--accent);fill:none;stroke-width:1.7;}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;z-index:95;padding:16px;}
+.modal-overlay.show{opacity:1;pointer-events:auto;}
+.modal-box{width:100%;max-width:400px;max-height:88vh;overflow-y:auto;background:var(--bg-soft);border:1px solid var(--glass-border);border-radius:16px;padding:22px;position:relative;transform:scale(.9);transition:transform .3s;}
+.modal-overlay.show .modal-box{transform:scale(1);}
+.modal-close{position:absolute;top:12px;left:12px;background:none;border:none;color:var(--text);font-size:1.3rem;cursor:pointer;}
+.modal-box h3{margin-bottom:14px;font-size:1.1rem;}
+.modal-box img{width:100%;height:170px;object-fit:cover;border-radius:10px;margin-bottom:12px;background:#222;}
+.modal-box p{color:var(--text-dim);font-size:.85rem;margin-bottom:14px;line-height:1.8;}
+.btn-primary{display:inline-block;background:linear-gradient(90deg,var(--accent2),var(--accent));padding:10px 22px;border-radius:10px;font-weight:700;color:#111;border:none;font-size:.9rem;}
+.field{margin-bottom:12px;}
+.field label{display:block;margin-bottom:6px;font-size:.8rem;color:var(--text-dim);}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:var(--bg);color:var(--text);font-size:.88rem;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--glass-border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-row .row-label{display:flex;align-items:center;gap:10px;}
+.switch{width:46px;height:26px;border-radius:20px;background:var(--glass);border:1px solid var(--glass-border);position:relative;cursor:pointer;flex-shrink:0;}
+.switch::after{content:'';position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:var(--accent);transition:transform .3s;}
+.switch.on::after{transform:translateX(-20px);}
+.lang-btns{display:flex;gap:8px;}
+.lang-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--glass-border);background:var(--glass);font-size:.8rem;color:var(--text-dim);}
+.lang-btn.active{background:var(--accent);color:#111;font-weight:700;border-color:var(--accent);}
+
+.hero{position:relative;height:40vh;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(-45deg,#1a1a1a,var(--accent2),#0a0a0a,var(--accent));background-size:400% 400%;animation:gradientShift 14s ease infinite;}
+@keyframes gradientShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 40%,rgba(255,140,0,.25),transparent 60%);animation:pulse 6s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:1;transform:scale(1.15);}}
+.hero-content{position:relative;z-index:2;text-align:center;padding:0 20px;}
+.hero-content h1{font-size:2.1rem;font-weight:800;text-shadow:0 0 25px rgba(255,140,0,.8);}
+.hero-content p{margin-top:8px;font-size:.88rem;color:#ddd;}
+
+.page-title{padding:20px 20px 4px;font-size:1.3rem;font-weight:800;}
+section.block{margin-top:24px;}
+.category-label{display:inline-block;padding:8px 20px;margin:0 20px 12px;font-weight:600;font-size:1.02rem;border-radius:14px;background:linear-gradient(135deg,var(--glass),rgba(0,0,0,.3));backdrop-filter:blur(10px);border:1px solid var(--glass-border);box-shadow:0 4px 18px rgba(255,106,0,.15);}
+.row-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:6px;}
+.row-header a{color:var(--accent);font-size:.82rem;font-weight:600;display:flex;align-items:center;gap:4px;}
+.row-header svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2;}
+.scroll-row{display:flex;gap:14px;overflow-x:auto;padding:6px 20px 26px;scroll-behavior:smooth;}
+.scroll-row::-webkit-scrollbar{height:6px;}
+.scroll-row::-webkit-scrollbar-thumb{background:var(--accent);border-radius:10px;}
+.card{flex:0 0 auto;width:145px;height:205px;border-radius:12px;background:linear-gradient(160deg,var(--card),#0d0d0d);border:1px solid var(--glass-border);display:flex;align-items:flex-end;justify-content:center;font-size:.8rem;padding:10px;text-align:center;transition:transform .3s,box-shadow .3s;cursor:pointer;overflow:hidden;position:relative;}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6;}
+.card span{position:relative;z-index:2;font-weight:600;}
+.card:hover{transform:translateY(-6px) scale(1.05);box-shadow:0 8px 25px rgba(255,106,0,.45);border-color:var(--accent);}
+
+.tabbar{position:fixed;bottom:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-around;background:var(--headerbg);backdrop-filter:blur(14px);border-top:1px solid var(--glass-border);z-index:60;}
+.tab-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--text-dim);font-size:.68rem;cursor:pointer;transition:color .25s,transform .25s;background:none;border:none;}
+.tab-item.active{color:var(--accent);transform:translateY(-3px);}
+.tab-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.6;}
+
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:16px 20px 30px;}
+.cat-big-card{border-radius:16px;padding:0;height:150px;position:relative;overflow:hidden;cursor:pointer;transition:transform .3s;border:1px solid var(--glass-border);background:linear-gradient(150deg,#1c1c1c,#0a0a0a);}
+.cat-big-card:hover{transform:translateY(-4px) scale(1.03);box-shadow:0 10px 28px rgba(255,106,0,.3);}
+.cat-big-card .overlay-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,140,0,.15),rgba(0,0,0,.75));}
+.cat-big-card h3{position:absolute;bottom:14px;right:16px;z-index:2;color:#fff;font-size:1.05rem;font-weight:700;}
+.cat-big-card .cbc-icon{position:absolute;top:16px;right:16px;z-index:2;}
+.cat-big-card .cbc-icon svg{width:26px;height:26px;stroke:var(--accent);fill:none;stroke-width:1.6;}
+
+.top10-row{display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--glass-border);cursor:pointer;}
+.top10-rank{font-size:2.4rem;font-weight:800;-webkit-text-stroke:2px var(--accent);color:transparent;width:48px;text-align:center;flex-shrink:0;}
+.top10-thumb{width:60px;height:82px;border-radius:8px;background:linear-gradient(160deg,#222,#111);flex-shrink:0;object-fit:cover;}
+.top10-info h4{font-size:.92rem;margin-bottom:4px;}
+.top10-info p{font-size:.72rem;color:var(--text-dim);}
+.content-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:14px;padding:16px 20px 30px;}
+
+.profile-guest{text-align:center;padding:50px 24px;}
+.profile-guest svg{width:60px;height:60px;stroke:var(--accent);fill:none;stroke-width:1.4;margin-bottom:16px;}
+.profile-header{display:flex;align-items:center;gap:16px;padding:24px 20px;}
+.avatar-wrap{position:relative;width:84px;height:84px;flex-shrink:0;}
+.avatar-wrap img{width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);background:#222;}
+.avatar-edit{position:absolute;bottom:-2px;left:-2px;width:26px;height:26px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;border:2px solid var(--bg-soft);}
+.avatar-edit svg{width:13px;height:13px;stroke:#111;fill:none;stroke-width:2;}
+.profile-info h2{font-size:1.15rem;}
+.profile-info p{color:var(--text-dim);font-size:.8rem;margin-top:4px;}
+.profile-body{padding:0 20px 30px;}
+.stat-row{display:flex;gap:12px;margin-bottom:20px;}
+.stat-box{flex:1;background:var(--card);border:1px solid var(--glass-border);border-radius:12px;padding:14px;text-align:center;}
+.stat-box b{font-size:1.15rem;color:var(--accent);display:block;}
+.stat-box span{font-size:.72rem;color:var(--text-dim);}
+
+.mission-card{background:var(--card);border:1px solid var(--glass-border);border-radius:14px;padding:16px;margin:0 20px 14px;display:flex;gap:14px;align-items:flex-start;}
+.mission-icon{width:44px;height:44px;border-radius:12px;background:var(--glass);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.mission-icon svg{width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:1.6;}
+.mission-card h4{font-size:.95rem;margin-bottom:4px;}
+.mission-card p{font-size:.78rem;color:var(--text-dim);margin-bottom:8px;line-height:1.7;}
+.mission-badge{display:inline-block;background:var(--glass);border:1px solid var(--glass-border);padding:4px 10px;border-radius:8px;font-size:.7rem;color:var(--accent);}
+
+.comment-item{padding:14px 20px;border-bottom:1px solid var(--glass-border);}
+.comment-item b{font-size:.85rem;}
+.comment-item p{font-size:.8rem;color:var(--text-dim);margin-top:4px;}
+.comment-add{padding:16px 20px;display:flex;gap:8px;position:sticky;bottom:64px;background:var(--bg);}
+.comment-add input{flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--glass-border);background:var(--bg-soft);color:var(--text);}
+.comment-add button{background:var(--accent);border:none;padding:0 16px;border-radius:10px;color:#111;font-weight:700;}
+
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--glass-border);border-radius:12px;padding:10px 14px;margin:16px 20px;}
+.search-bar svg{width:18px;height:18px;stroke:var(--text-dim);fill:none;stroke-width:1.7;}
+.search-bar input{flex:1;background:none;border:none;color:var(--text);font-size:.85rem;outline:none;}
+.short-card{background:linear-gradient(150deg,#1c1c1c,#0a0a0a);border:1px solid var(--glass-border);border-radius:16px;margin:14px 20px;padding:16px;display:flex;align-items:center;justify-content:space-between;}
+.short-user{display:flex;align-items:center;gap:12px;}
+.short-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));}
+.follow-btn{background:var(--glass);border:1px solid var(--glass-border);color:var(--accent);padding:6px 16px;border-radius:8px;font-size:.78rem;font-weight:700;}
+.follow-btn.following{background:var(--accent);color:#111;}
+
+.admin-login-box{max-width:340px;margin:60px auto;padding:26px;background:var(--bg-soft);border:1px solid var(--glass-border);border-radius:16px;text-align:center;}
+.admin-login-box svg{width:44px;height:44px;stroke:var(--accent);fill:none;stroke-width:1.5;margin-bottom:10px;}
+.admin-tabs{display:flex;gap:8px;overflow-x:auto;padding:16px 20px 0;}
+.admin-tab-btn{padding:8px 16px;border-radius:10px;background:var(--glass);border:1px solid var(--glass-border);font-size:.8rem;color:var(--text-dim);white-space:nowrap;}
+.admin-tab-btn.active{background:var(--accent);color:#111;font-weight:700;}
+.admin-panel-box{padding:20px;}
+.admin-card{background:var(--card);border:1px solid var(--glass-border);border-radius:12px;padding:16px;margin-bottom:12px;}
+.admin-card h5{font-size:.9rem;margin-bottom:6px;}
+.admin-card p{font-size:.78rem;color:var(--text-dim);}
+.admin-row-actions{display:flex;gap:8px;margin-top:10px;}
+.btn-sm{padding:6px 12px;border-radius:8px;font-size:.75rem;border:1px solid var(--glass-border);background:var(--glass);color:var(--text);}
+.btn-sm.danger{color:#ff5555;border-color:#ff5555;}
+table{width:100%;border-collapse:collapse;font-size:.8rem;}
+table th,table td{padding:8px;text-align:right;border-bottom:1px solid var(--glass-border);}
+.checkbox-row{display:flex;align-items:center;gap:8px;margin:10px 0;}
+.checkbox-row input{width:auto;}
+.empty-note{text-align:center;color:var(--text-dim);font-size:.85rem;padding:30px 10px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ir filoom</div>
+  <div class="menu-trigger" onclick="openSidePanel()"><span></span><span></span><span></span></div>
+</header>
+
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<div class="side-panel" id="sidePanel">
+  <div class="sp-header">
+    <span data-i18n="menu">منو</span>
+    <button class="close-btn" onclick="closeAll()"><svg viewBox="0 0 24 24"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></button>
+  </div>
+  <div class="sp-item" onclick="goto('profile');closeAll()">
+    <div class="icon-glass"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg></div>
+    <span data-i18n="profile">پروفایل</span>
+  </div>
+  <div class="sp-item" onclick="goto('missions');closeAll()">
+    <div class="icon-glass"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div>
+    <span data-i18n="missions">ماموریت‌ها</span>
+  </div>
+  <div class="sp-item" onclick="openModal('settingsModal')">
+    <div class="icon-glass"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a8 8 0 0 0 0-6l1.6-1.4-2-3.4-1.9.6a8 8 0 0 0-2.6-1.5L14 1h-4l-.5 2.3a8 8 0 0 0-2.6 1.5l-1.9-.6-2 3.4L4.6 9a8 8 0 0 0 0 6L3 16.4l2 3.4 1.9-.6a8 8 0 0 0 2.6 1.5L10 23h4l.5-2.3a8 8 0 0 0 2.6-1.5l1.9.6 2-3.4z"/></svg></div>
+    <span data-i18n="settings">تنظیمات</span>
+  </div>
+  <a class="sp-item" href="https://t.me/br0hick" target="_blank">
+    <div class="icon-glass"><svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></div>
+    <span data-i18n="contact">ارتباط با ما</span>
+  </a>
+  <div class="sp-item" onclick="openModal('aboutModal')">
+    <div class="icon-glass"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="8.01"/><line x1="12" y1="11" x2="12" y2="16"/></svg></div>
+    <span data-i18n="about">درباره ما</span>
+  </div>
+  <div class="sp-item" onclick="goto('comments');closeAll()">
+    <div class="icon-glass"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-1.1 4.2L21 20l-4.4-1.2a8.4 8.4 0 1 1 4.4-7.3z"/></svg></div>
+    <span data-i18n="comments">نظرات</span>
+  </div>
+  <div class="sp-item" onclick="goto('admin');closeAll()">
+    <div class="icon-glass"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
+    <span data-i18n="adminpanel">پنل مدیریت</span>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('settingsModal')">×</button>
+    <h3 data-i18n="settings">تنظیمات</h3>
+    <div class="settings-row">
+      <div class="row-label"><svg width="18" height="18" viewBox="0 0 24 24" stroke="#ff8c00" fill="none" stroke-width="1.6"><path d="M21 12.5A9 9 0 1 1 11.5 3 7 7 0 0 0 21 12.5z"/></svg><span data-i18n="theme">تم شب / روز</span></div>
+      <div class="switch" id="themeSwitch" onclick="toggleTheme()"></div>
+    </div>
+    <div class="settings-row">
+      <div class="row-label"><svg width="18" height="18" viewBox="0 0 24 24" stroke="#ff8c00" fill="none" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/></svg><span data-i18n="language">زبان</span></div>
+      <div class="lang-btns">
+        <button class="lang-btn" id="btnFa" onclick="setLang('fa')">فارسی</button>
+        <button class="lang-btn" id="btnEn" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="aboutModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('aboutModal')">×</button>
+    <h3 data-i18n="about">درباره ما</h3>
+    <p id="aboutText"></p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="contentModal">
+  <div class="modal-box" id="contentModalBody"></div>
+</div>
+
+<div class="modal-overlay" id="signupModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal('signupModal')">×</button>
+    <h3 data-i18n="signup_title">ثبت‌نام در ir filoom</h3>
+    <p style="margin-bottom:14px;" data-i18n="signup_note">برای مشاهده‌ی پروفایل، ثبت نظر و دیدن بیش از سه محتوا، ثبت‌نام لازم است.</p>
+    <form onsubmit="submitSignup(event)">
+      <div class="field"><label data-i18n="fullname">نام و نام‌خانوادگی</label><input type="text" id="su_name" required></div>
+      <div class="field"><label data-i18n="phone">شماره موبایل</label><input type="tel" id="su_phone" required></div>
+      <div class="field"><label data-i18n="username">آیدی (یوزرنیم)</label><input type="text" id="su_uid" required></div>
+      <button class="btn-primary" type="submit" style="width:100%;" data-i18n="submit">ثبت‌نام</button>
+    </form>
+  </div>
+</div>
+
+<main>
+
+<section class="view active" id="view-home">
+  <div class="hero">
+    <div class="hero-content">
+      <h1>ir filoom</h1>
+      <p data-i18n="hero_sub">مرجع دانلود انیمیشن/انیمه، فیلم، رمان و مانگا</p>
+    </div>
+  </div>
+  <div id="homeCategories"></div>
+</section>
+
+<section class="view" id="view-categories">
+  <div class="page-title" data-i18n="categories_title">دسته‌بندی‌ها</div>
+  <div class="cat-grid">
+    <div class="cat-big-card" onclick="goto('category-detail','anime')">
+      <div class="overlay-grad"></div>
+      <div class="cbc-icon"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 11l-5.5 2.5L12 19l-2.5-5.5L4 11l5.5-2.5z"/></svg></div>
+      <h3 data-i18n="cat_anime">انیمیشن / انیمه</h3>
+    </div>
+    <div class="cat-big-card" onclick="goto('category-detail','movie')">
+      <div class="overlay-grad"></div>
+      <div class="cbc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="17" y2="20"/><line x1="3" y1="9" x2="7" y2="9"/><line x1="3" y1="15" x2="7" y2="15"/><line x1="17" y1="9" x2="21" y2="9"/><line x1="17" y1="15" x2="21" y2="15"/></svg></div>
+      <h3 data-i18n="cat_movie">فیلم و سریال</h3>
+    </div>
+    <div class="cat-big-card" onclick="goto('category-detail','novel')">
+      <div class="overlay-grad"></div>
+      <div class="cbc-icon"><svg viewBox="0 0 24 24"><path d="M4 4h9a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M20 4h-4v16h4z"/></svg></div>
+      <h3 data-i18n="cat_novel">رمان</h3>
+    </div>
+    <div class="cat-big-card" onclick="goto('category-detail','manga')">
+      <div class="overlay-grad"></div>
+      <div class="cbc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg></div>
+      <h3 data-i18n="cat_manga">مانگا / کمیک</h3>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="view-category-detail">
+  <div class="page-title" id="catDetailTitle"></div>
+  <div class="category-label" data-i18n="top10_label">برترین‌های این دسته</div>
+  <div id="catTop10List"></div>
+  <div class="category-label" style="margin-top:22px;" data-i18n="all_label">همه محتواها</div>
+  <div class="content-grid" id="catAllGrid"></div>
+</section>
+
+<section class="view" id="view-profile"></section>
+
+<section class="view" id="view-missions">
+  <div class="page-title" data-i18n="missions_title">ماموریت‌ها</div>
+  <p style="padding:0 20px 16px;color:var(--text-dim);font-size:.85rem;" data-i18n="missions_sub">با انجام ماموریت‌ها، اشتراک دانلود نامحدود (از یک هفته تا دو ماه) به‌صورت جایزه دریافت کن.</p>
+  <div id="missionsList"></div>
+</section>
+
+<section class="view" id="view-comments">
+  <div class="page-title" data-i18n="comments_title">نظرات</div>
+  <div id="commentsList"></div>
+  <div class="comment-add">
+    <input type="text" id="newCommentText" placeholder="نظرت رو بنویس...">
+    <button onclick="addComment()" data-i18n="send">ارسال</button>
+  </div>
+</section>
+
+<section class="view" id="view-shorts">
+  <div class="page-title" data-i18n="shorts_title">شورت ویدیو</div>
+  <div class="search-bar">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg>
+    <input type="text" placeholder="جستجوی آیدی کاربر...">
+  </div>
+  <div id="shortsUserList"></div>
+</section>
+
+<section class="view" id="view-admin"></section>
+
+</main>
+
+<nav class="tabbar">
+  <button class="tab-item active" data-tab="home" onclick="goto('home')">
+    <svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg>
+    <span data-i18n="tab_home">خانه</span>
+  </button>
+  <button class="tab-item" data-tab="categories" onclick="goto('categories')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    <span data-i18n="tab_categories">دسته‌بندی</span>
+  </button>
+  <button class="tab-item" data-tab="profile" onclick="goto('profile')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+    <span data-i18n="tab_profile">پروفایل</span>
+  </button>
+  <button class="tab-item" data-tab="shorts" onclick="goto('shorts')">
+    <svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M10 8l6 4-6 4z"/></svg>
+    <span data-i18n="tab_shorts">شورت</span>
+  </button>
+</nav>
+
+<script>
+/* ---------------- DATABASE (localStorage) ---------------- */
+const DB_KEY='ir_filoom_db', USER_KEY='ir_filoom_user', ADMIN_KEY='ir_filoom_admin', VC_KEY='ir_filoom_vc';
+
+function loadDB(){
+  let db=JSON.parse(localStorage.getItem(DB_KEY)||'null');
+  if(!db){
+    db={
+      contents:[
+        {id:1,type:'anime',title:'نمونه انیمه ۱',desc:'توضیحات نمونه برای این انیمه.',image:'',link:'#',isTop10:true,rank:1},
+        {id:2,type:'anime',title:'نمونه انیمه ۲',desc:'توضیحات نمونه.',image:'',link:'#',isTop10:true,rank:2},
+        {id:3,type:'movie',title:'نمونه فیلم ۱',desc:'توضیحات نمونه فیلم.',image:'',link:'#',isTop10:true,rank:1},
+        {id:4,type:'novel',title:'نمونه رمان ۱',desc:'توضیحات نمونه رمان.',image:'',link:'#',isTop10:true,rank:1},
+        {id:5,type:'manga',title:'نمونه مانگا ۱',desc:'توضیحات نمونه مانگا.',image:'',link:'#',isTop10:true,rank:1}
+      ],
+      users:[],
+      comments:[],
+      missions:[
+        {id:1,title:'دعوت از ۳ دوست',desc:'با دعوت سه نفر از دوستانت که ثبت‌نام کنن، این ماموریت تکمیل می‌شه.',reward:'۱ هفته اشتراک نامحدود',difficulty:'آسان'},
+        {id:2,title:'ثبت ۱۰ نظر',desc:'روی محتواهای مختلف سایت ۱۰ نظر ثبت کن.',reward:'۲ هفته اشتراک نامحدود',difficulty:'متوسط'},
+        {id:3,title:'فعالیت ۲ ماهه پیوسته',desc:'به مدت دو ماه هر هفته حداقل یک‌بار وارد سایت شو.',reward:'۲ ماه اشتراک نامحدود',difficulty:'سخت'}
+      ],
+      about:'ir filoom مرجع دانلود انیمیشن/انیمه، فیلم، رمان و مانگا است. این متن از پنل مدیریت قابل ویرایش است.'
+    };
+    localStorage.setItem(DB_KEY,JSON.stringify(db));
+  }
+  return db;
+}
+function saveDB(db){ localStorage.setItem(DB_KEY,JSON.stringify(db)); }
+function getUser(){ return JSON.parse(localStorage.getItem(USER_KEY)||'null'); }
+function setUser(u){ localStorage.setItem(USER_KEY,JSON.stringify(u)); }
+
+let pendingAction=null;
+
+/* ---------------- PANELS / MODALS ---------------- */
+function openSidePanel(){ document.getElementById('sidePanel').classList.add('open'); document.getElementById('overlay').classList.add('show'); }
+function closeAll(){ document.getElementById('sidePanel').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('show')); }
+function openModal(id){ document.getElementById(id).classList.add('show'); if(id==='aboutModal'){ document.getElementById('aboutText').textContent=loadDB().about; } }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+function openSignup(){ openModal('signupModal'); }
+function requireAuth(cb){ if(getUser()){ cb(); } else { pendingAction=cb; openSignup(); } }
+
+function submitSignup(e){
+  e.preventDefault();
+  const name=document.getElementById('su_name').value.trim();
+  const phone=document.getElementById('su_phone').value.trim();
+  const uid=document.getElementById('su_uid').value.trim();
+  if(!name||!phone||!uid) return;
+  const user={name,phone,uid,avatar:'',bio:'',date:new Date().toLocaleDateString('fa-IR')};
+  setUser(user);
+  const db=loadDB(); db.users.push(user); saveDB(db);
+  closeModal('signupModal');
+  if(pendingAction){ pendingAction(); pendingAction=null; }
+  if(document.getElementById('view-profile').classList.contains('active')) renderProfile();
+}
+
+/* periodic reminder every 60s if not registered */
+setInterval(()=>{
+  if(!getUser() && !document.querySelector('.modal-overlay.show')){ openSignup(); }
+}, 60000);
+
+/* ---------------- THEME / LANG ---------------- */
+function toggleTheme(){
+  const html=document.documentElement;
+  const cur=html.getAttribute('data-theme');
+  const next=cur==='dark'?'light':'dark';
+  html.setAttribute('data-theme',next);
+  document.getElementById('themeSwitch').classList.toggle('on', next==='light');
+  localStorage.setItem('ir_filoom_theme',next);
+}
+(function initTheme(){
+  const t=localStorage.getItem('ir_filoom_theme')||'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  window.addEventListener('DOMContentLoaded',()=>{ document.getElementById('themeSwitch').classList.toggle('on', t==='light'); });
+})();
+
+const I18N={
+  fa:{menu:'منو',profile:'پروفایل',missions:'ماموریت‌ها',settings:'تنظیمات',contact:'ارتباط با ما',about:'درباره ما',comments:'نظرات',adminpanel:'پنل مدیریت',theme:'تم شب / روز',language:'زبان',signup_title:'ثبت‌نام در ir filoom',signup_note:'برای مشاهده‌ی پروفایل، ثبت نظر و دیدن بیش از سه محتوا، ثبت‌نام لازم است.',fullname:'نام و نام‌خانوادگی',phone:'شماره موبایل',username:'آیدی (یوزرنیم)',submit:'ثبت‌نام',hero_sub:'مرجع دانلود انیمیشن/انیمه، فیلم، رمان و مانگا',categories_title:'دسته‌بندی‌ها',cat_anime:'انیمیشن / انیمه',cat_movie:'فیلم و سریال',cat_novel:'رمان',cat_manga:'مانگا / کمیک',top10_label:'برترین‌های این دسته',all_label:'همه محتواها',missions_title:'ماموریت‌ها',missions_sub:'با انجام ماموریت‌ها، اشتراک دانلود نامحدود (از یک هفته تا دو ماه) به‌صورت جایزه دریافت کن.',comments_title:'نظرات',send:'ارسال',shorts_title:'شورت ویدیو',tab_home:'خانه',tab_categories:'دسته‌بندی',tab_profile:'پروفایل',tab_shorts:'شورت'},
+  en:{menu:'Menu',profile:'Profile',missions:'Missions',settings:'Settings',contact:'Contact Us',about:'About Us',comments:'Comments',adminpanel:'Admin Panel',theme:'Dark / Light Theme',language:'Language',signup_title:'Sign up to ir filoom',signup_note:'Sign up is required to view profile, comment, or watch more than 3 items.',fullname:'Full Name',phone:'Phone Number',username:'Username',submit:'Sign Up',hero_sub:'Your source for Anime, Movies, Novels & Manga downloads',categories_title:'Categories',cat_anime:'Anime / Animation',cat_movie:'Movies & Series',cat_novel:'Novel',cat_manga:'Manga / Comic',top10_label:'Top of this category',all_label:'All content',missions_title:'Missions',missions_sub:'Complete missions to earn unlimited download subscription (1 week to 2 months).',comments_title:'Comments',send:'Send',shorts_title:'Short Videos',tab_home:'Home',tab_categories:'Categories',tab_profile:'Profile',tab_shorts:'Shorts'}
+};
+function setLang(l){
+  localStorage.setItem('ir_filoom_lang',l);
+  document.documentElement.setAttribute('lang',l);
+  document.documentElement.setAttribute('dir', l==='en'?'ltr':'rtl');
+  document.getElementById('btnFa').classList.toggle('active',l==='fa');
+  document.getElementById('btnEn').classList.toggle('active',l==='en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');
+    if(I18N[l] && I18N[l][k]) el.textContent=I18N[l][k];
+  });
+}
+window.addEventListener('DOMContentLoaded',()=>{ setLang(localStorage.getItem('ir_filoom_lang')||'fa'); });
+
+/* ---------------- ROUTING ---------------- */
+function goto(view,param){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  const tabMap={home:'home',categories:'categories','category-detail':'categories',profile:'profile',shorts:'shorts'};
+  const tabKey=tabMap[view];
+  if(tabKey){ const el=document.querySelector('.tab-item[data-tab="'+tabKey+'"]'); if(el) el.classList.add('active'); }
+
+  if(view==='profile'){ if(!getUser()){ requireAuth(renderProfile); } renderProfile(); }
+  if(view==='category-detail') renderCategoryDetail(param);
+  if(view==='missions') renderMissions();
+  if(view==='comments') renderComments();
+  if(view==='admin') renderAdmin();
+  if(view==='shorts') renderShorts();
+  window.scrollTo(0,0);
+  closeAll();
+}
+
+const CAT_NAMES={anime:'انیمیشن / انیمه',movie:'فیلم و سریال',novel:'رمان',manga:'مانگا / کمیک'};
+
+/* ---------------- HOME ---------------- */
+function renderHome(){
+  const db=loadDB();
+  const types=['anime','movie','novel','manga'];
+  let html='';
+  types.forEach(t=>{
+    const items=db.contents.filter(c=>c.type===t);
+    html+=`<section class="block">
+      <span class="category-label">${CAT_NAMES[t]}</span>
+      <div class="row-header"><span></span><a href="javascript:void(0)" onclick="goto('category-detail','${t}')">نمایش کامل <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></a></div>
+      <div class="scroll-row">
+        ${ items.length ? items.map(cardHTML).join('') : '<div class="empty-note" style="width:100%">هنوز محتوایی در این دسته اضافه نشده</div>' }
+      </div>
+    </section>`;
+  });
+  document.getElementById('homeCategories').innerHTML=html;
+}
+function cardHTML(item){
+  return `<div class="card" onclick="openContent(${item.id})">
+    ${item.image?`<img src="${item.image}">`:''}
+    <span>${item.title}</span>
+  </div>`;
+}
+
+/* ---------------- CATEGORY DETAIL ---------------- */
+function renderCategoryDetail(type){
+  const db=loadDB();
+  document.getElementById('catDetailTitle').textContent=CAT_NAMES[type]||'';
+  const all=db.contents.filter(c=>c.type===type);
+  const top=all.filter(c=>c.isTop10).sort((a,b)=>(a.rank||99)-(b.rank||99)).slice(0,10);
+  document.getElementById('catTop10List').innerHTML = top.length ? top.map(item=>`
+    <div class="top10-row" onclick="openContent(${item.id})">
+      <div class="top10-rank">${item.rank||''}</div>
+      ${item.image?`<img class="top10-thumb" src="${item.image}">`:`<div class="top10-thumb"></div>`}
+      <div class="top10-info"><h4>${item.title}</h4><p>${(item.desc||'').slice(0,40)}</p></div>
+    </div>`).join('') : '<div class="empty-note">هنوز برترینی برای این دسته ثبت نشده</div>';
+  document.getElementById('catAllGrid').innerHTML = all.length ? all.map(cardHTML).join('') : '<div class="empty-note">محتوایی موجود نیست</div>';
+}
+
+/* ---------------- CONTENT MODAL (with view-limit gate) ---------------- */
+function openContent(id){
+  const db=loadDB();
+  const item=db.contents.find(c=>c.id===id);
+  if(!item) return;
+  if(!getUser()){
+    let vc=parseInt(localStorage.getItem(VC_KEY)||'0');
+    if(vc>=3){ requireAuth(()=>showContentModal(item)); return; }
+    localStorage.setItem(VC_KEY, vc+1);
+  }
+  showContentModal(item);
+}
+function showContentModal(item){
+  document.getElementById('contentModalBody').innerHTML=`
+    <button class="modal-close" onclick="closeModal('contentModal')">×</button>
+    ${item.image?`<img src="${item.image}">`:''}
+    <h3>${item.title}</h3>
+    <p>${item.desc||''}</p>
+    <a class="btn-primary" href="${item.link||'#'}" target="_blank">دانلود</a>`;
+  openModal('contentModal');
+}
+
+/* ---------------- PROFILE ---------------- */
+function renderProfile(){
+  const box=document.getElementById('view-profile');
+  const user=getUser();
+  if(!user){
+    box.innerHTML=`<div class="profile-guest">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6 8-6s8 2 8 6"/></svg>
+      <h3>برای مشاهده پروفایل ابتدا ثبت‌نام کن</h3>
+      <p style="color:var(--text-dim);margin:10px 0 20px;font-size:.85rem;">پس از ثبت‌نام می‌تونی عکس پروفایل بگذاری و بیوی خودت رو بنویسی.</p>
+      <button class="btn-primary" onclick="openSignup()">ثبت‌نام</button>
+    </div>`;
+    return;
+  }
+  box.innerHTML=`
+    <div class="profile-header">
+      <div class="avatar-wrap">
+        <img id="avatarPreview" src="${user.avatar||''}" onerror="this.style.opacity=0">
+        <label class="avatar-edit"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 21h14"/></svg><input type="file" accept="image/*" style="display:none" onchange="uploadAvatar(event)"></label>
+      </div>
+      <div class="profile-info"><h2>${user.name}</h2><p>@${user.uid}</p></div>
+    </div>
+    <div class="profile-body">
+      <div class="stat-row">
+        <div class="stat-box"><b>${loadDB().comments.filter(c=>c.uid===user.uid).length}</b><span>نظرات</span></div>
+        <div class="stat-box"><b>0</b><span>مشاهده</span></div>
+        <div class="stat-box"><b>0</b><span>ماموریت انجام‌شده</span></div>
+      </div>
+      <div class="field"><label>نام نمایشی</label><input type="text" id="p_name" value="${user.name}"></div>
+      <div class="field"><label>بیوگرافی</label><textarea id="p_bio" rows="3" placeholder="چند خط درباره خودت بنویس...">${user.bio||''}</textarea></div>
+      <div class="field"><label>شماره موبایل</label><input type="text" id="p_phone" value="${user.phone}"></div>
+      <button class="btn-primary" style="width:100%" onclick="saveProfile()">ذخیره تغییرات</button>
+    </div>`;
+}
+function uploadAvatar(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{ document.getElementById('avatarPreview').src=reader.result; document.getElementById('avatarPreview').style.opacity=1; const u=getUser(); u.avatar=reader.result; setUser(u); };
+  reader.readAsDataURL(file);
+}
+function saveProfile(){
+  const u=getUser();
+  u.name=document.getElementById('p_name').value.trim()||u.name;
+  u.bio=document.getElementById('p_bio').value.trim();
+  u.phone=document.getElementById('p_phone').value.trim()||u.phone;
+  setUser(u); renderProfile();
+  alert('تغییرات ذخیره شد');
+}
+
+/* ---------------- MISSIONS ---------------- */
+function renderMissions(){
+  const db=loadDB();
+  document.getElementById('missionsList').innerHTML = db.missions.map(m=>`
+    <div class="mission-card">
+      <div class="mission-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg></div>
+      <div>
+        <h4>${m.title}</h4>
+        <p>${m.desc}</p>
+        <span class="mission-badge">جایزه: ${m.reward} · سختی: ${m.difficulty}</span>
+      </div>
+    </div>`).join('');
+}
+
+/* ---------------- COMMENTS ---------------- */
+function renderComments(){
+  const db=loadDB();
+  document.getElementById('commentsList').innerHTML = db.comments.length ? db.comments.map(c=>`
+    <div class="comment-item"><b>${c.name}</b><p>${c.text}</p></div>`).reverse().join('') : '<div class="empty-note">هنوز نظری ثبت نشده، اولین نفر باش</div>';
+}
+function addComment(){
+  const text=document.getElementById('newCommentText').value.trim();
+  if(!text) return;
+  requireAuth(()=>{
+    const user=getUser();
+    const db=loadDB();
+    db.comments.push({name:user.name,uid:user.uid,text,date:new Date().toLocaleDateString('fa-IR')});
+    saveDB(db);
+    document.getElementById('newCommentText').value='';
+    renderComments();
+  });
+}
+
+/* ---------------- SHORTS ---------------- */
+function renderShorts(){
+  const sampleUsers=[{uid:'ali_anime',name:'علی'},{uid:'saba_movie',name:'صبا'},{uid:'reza_manga',name:'رضا'}];
+  document.getElementById('shortsUserList').innerHTML=sampleUsers.map(u=>`
+    <div class="short-card">
+      <div class="short-user"><div class="short-avatar"></div><div><b>${u.name}</b><div style="font-size:.75rem;color:var(--text-dim)">@${u.uid}</div></div></div>
+      <button class="follow-btn" onclick="this.classList.toggle('following');this.textContent=this.classList.contains('following')?'دنبال شده':'دنبال کردن'">دنبال کردن</button>
+    </div>`).join('');
+}
+
+/* ---------------- ADMIN PANEL ---------------- */
+function renderAdmin(){
+  const box=document.getElementById('view-admin');
+  if(sessionStorage.getItem(ADMIN_KEY)==='1'){ renderAdminDashboard(box); }
+  else{
+    box.innerHTML=`<div class="admin-login-box">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>
+      <h3 style="margin-bottom:14px">ورود به پنل مدیریت</h3>
+      <div class="field"><input type="password" id="adminPass" placeholder="رمز عبور"></div>
+      <button class="btn-primary" style="width:100%" onclick="adminLogin()">ورود</button>
+    </div>`;
+  }
+}
+function adminLogin(){
+  const pass=document.getElementById('adminPass').value;
+  if(pass==='2222'){ sessionStorage.setItem(ADMIN_KEY,'1'); renderAdmin(); }
+  else alert('رمز عبور اشتباه است');
+}
+function adminLogout(){ sessionStorage.removeItem(ADMIN_KEY); renderAdmin(); }
+
+function renderAdminDashboard(box){
+  box.innerHTML=`
+    <div class="page-title">پنل مدیریت<button class="btn-sm danger" style="float:left" onclick="adminLogout()">خروج</button></div>
+    <div class="admin-tabs">
+      <button class="admin-tab-btn active" data-t="add" onclick="switchAdminTab('add')">افزودن محتوا</button>
+      <button class="admin-tab-btn" data-t="list" onclick="switchAdminTab('list')">لیست محتوا</button>
+      <button class="admin-tab-btn" data-t="users" onclick="switchAdminTab('users')">کاربران</button>
+      <button class="admin-tab-btn" data-t="missions" onclick="switchAdminTab('missions')">ماموریت‌ها</button>
+      <button class="admin-tab-btn" data-t="about" onclick="switchAdminTab('about')">درباره ما</button>
+    </div>
+    <div class="admin-panel-box" id="adminTabBody"></div>`;
+  switchAdminTab('add');
+}
+function switchAdminTab(t){
+  document.querySelectorAll('.admin-tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.t===t));
+  const body=document.getElementById('adminTabBody');
+  if(t==='add') body.innerHTML=adminAddForm();
+  if(t==='list'){ body.innerHTML='<div id="adminContentList"></div>'; renderAdminContentList(); }
+  if(t==='users'){ body.innerHTML='<div id="adminUsersList"></div>'; renderAdminUsersList(); }
+  if(t==='missions'){ body.innerHTML=adminMissionForm()+'<div id="adminMissionsList"></div>'; renderAdminMissionsList(); }
+  if(t==='about') body.innerHTML=adminAboutForm();
+}
+function adminAddForm(){
+  return `<form onsubmit="submitContent(event)">
+    <div class="field"><label>نوع محتوا</label>
+      <select id="c_type"><option value="anime">انیمیشن / انیمه</option><option value="movie">فیلم و سریال</option><option value="novel">رمان</option><option value="manga">مانگا / کمیک</option></select>
+    </div>
+    <div class="field"><label>عنوان</label><input type="text" id="c_title" required></div>
+    <div class="field"><label>تصویر (آپلود فایل)</label><input type="file" id="c_image" accept="image/*"></div>
+    <div class="field"><label>یا لینک تصویر</label><input type="url" id="c_image_url" placeholder="https://..."></div>
+    <div class="field"><label>توضیحات</label><textarea id="c_desc" rows="3" required></textarea></div>
+    <div class="field"><label>لینک دانلود</label><input type="url" id="c_link" required></div>
+    <div class="checkbox-row"><input type="checkbox" id="c_top"><label>در لیست برترین‌ها (Top 10) قرار بگیرد</label></div>
+    <div class="field"><label>رتبه (۱ تا ۱۰)</label><input type="number" id="c_rank" min="1" max="10"></div>
+    <button class="btn-primary" type="submit" style="width:100%">ثبت محتوا</button>
+  </form>`;
+}
+function submitContent(e){
+  e.preventDefault();
+  const db=loadDB();
+  const type=document.getElementById('c_type').value;
+  const title=document.getElementById('c_title').value.trim();
+  const desc=document.getElementById('c_desc').value.trim();
+  const link=document.getElementById('c_link').value.trim();
+  const isTop=document.getElementById('c_top').checked;
+  const rank=parseInt(document.getElementById('c_rank').value)||null;
+  const fileInput=document.getElementById('c_image');
+  const urlInput=document.getElementById('c_image_url').value.trim();
+  function finalize(imageData){
+    db.contents.push({id:Date.now(),type,title,desc,link,image:imageData||'',isTop10:isTop,rank:isTop?rank:null});
+    saveDB(db);
+    alert('محتوا با موفقیت اضافه شد');
+    document.getElementById('adminTabBody').innerHTML=adminAddForm();
+    renderHome();
+  }
+  if(fileInput.files && fileInput.files[0]){
+    const reader=new FileReader();
+    reader.onload=()=>finalize(reader.result);
+    reader.readAsDataURL(fileInput.files[0]);
+  } else finalize(urlInput);
+}
+function renderAdminContentList(){
+  const db=loadDB();
+  document.getElementById('adminContentList').innerHTML = db.contents.length ? db.contents.map(item=>`
+    <div class="admin-card">
+      <h5>${item.title} <span style="color:var(--accent);font-size:.7rem">(${CAT_NAMES[item.type]})</span></h5>
+      <p>${item.desc}</p>
+      <p>Top10: ${item.isTop10?('بله - رتبه '+item.rank):'خیر'}</p>
+      <div class="admin-row-actions">
+        <button class="btn-sm danger" onclick="deleteContent(${item.id})">حذف</button>
+      </div>
+    </div>`).join('') : '<div class="empty-note">هنوز محتوایی ثبت نشده</div>';
+}
+function deleteContent(id){
+  const db=loadDB();
+  db.contents=db.contents.filter(c=>c.id!==id);
+  saveDB(db); renderAdminContentList(); renderHome();
+}
+function renderAdminUsersList(){
+  const db=loadDB();
+  document.getElementById('adminUsersList').innerHTML = db.users.length ? `
+    <table><thead><tr><th>نام</th><th>شماره</th><th>آیدی</th><th>تاریخ</th></tr></thead>
+    <tbody>${db.users.map(u=>`<tr><td>${u.name}</td><td>${u.phone}</td><td>@${u.uid}</td><td>${u.date}</td></tr>`).join('')}</tbody></table>`
+    : '<div class="empty-note">هنوز کاربری ثبت‌نام نکرده</div>';
+}
+function adminMissionForm(){
+  return `<div class="admin-card">
+    <h5 style="margin-bottom:10px">افزودن ماموریت جدید</h5>
+    <div class="field"><label>عنوان</label><input type="text" id="m_title"></div>
+    <div class="field"><label>توضیحات</label><textarea id="m_desc" rows="2"></textarea></div>
+    <div class="field"><label>جایزه (مثلاً: ۱ ماه اشتراک نامحدود)</label><input type="text" id="m_reward"></div>
+    <div class="field"><label>سختی</label><select id="m_diff"><option>آسان</option><option>متوسط</option><option>سخت</option></select></div>
+    <button class="btn-primary" style="width:100%" onclick="addMission()">افزودن ماموریت</button>
+  </div>`;
+}
+function addMission(){
+  const title=document.getElementById('m_title').value.trim();
+  const desc=document.getElementById('m_desc').value.trim();
+  const reward=document.getElementById('m_reward').value.trim();
+  const difficulty=document.getElementById('m_diff').value;
+  if(!title||!reward) return alert('عنوان و جایزه را وارد کن');
+  const db=loadDB();
+  db.missions.push({id:Date.now(),title,desc,reward,difficulty});
+  saveDB(db); switchAdminTab('missions');
+}
+function renderAdminMissionsList(){
+  const db=loadDB();
+  document.getElementById('adminMissionsList').innerHTML = db.missions.map(m=>`
+    <div class="admin-card">
+      <h5>${m.title}</h5><p>${m.desc}</p><p>جایزه: ${m.reward} · سختی: ${m.difficulty}</p>
+      <div class="admin-row-actions"><button class="btn-sm danger" onclick="deleteMission(${m.id})">حذف</button></div>
+    </div>`).join('');
+}
+function deleteMission(id){
+  const db=loadDB(); db.missions=db.missions.filter(m=>m.id!==id); saveDB(db); renderAdminMissionsList();
+}
+function adminAboutForm(){
+  const db=loadDB();
+  return `<div class="field"><label>متن «درباره ما»</label><textarea id="aboutEdit" rows="6">${db.about}</textarea></div>
+    <button class="btn-primary" style="width:100%" onclick="saveAbout()">ذخیره</button>`;
+}
+function saveAbout(){
+  const db=loadDB();
+  db.about=document.getElementById('aboutEdit').value.trim();
+  saveDB(db); alert('ذخیره شد');
+}
+
+/* ---------------- INIT ---------------- */
+renderHome();
+</script>
+</body>
+</html>
